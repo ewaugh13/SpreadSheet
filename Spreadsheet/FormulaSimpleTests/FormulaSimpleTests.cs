@@ -49,6 +49,87 @@ namespace FormulaTestCases
         }
 
         /// <summary>
+        /// syntax error with wrong characters.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test1()
+        {
+            Formula f = new Formula("(? ! $");
+        }
+
+        /// <summary>
+        /// syntax error with no tokens.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test2()
+        {
+            Formula f = new Formula("");
+        }
+
+        /// <summary>
+        /// Too many closing parenthesis after opening parenthesis.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test3()
+        {
+            Formula f = new Formula("())(");
+        }
+
+        /// <summary>
+        /// Another syntax error not equal parenthesis counts.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test4()
+        {
+            Formula f = new Formula("((2 + 2) + 4))");
+        }
+
+        /// <summary>
+        /// Another syntax error leading with a operator.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test5()
+        {
+            Formula f = new Formula("+ 2");
+        }
+
+        /// <summary>
+        /// Another syntax error not equal parenthesis.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test6()
+        {
+            Formula f = new Formula("(2 +");
+        }
+
+        /// <summary>
+        /// Another syntax error of no variables or numbers inputer.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test7()
+        {
+            Formula f = new Formula("( )");
+        }
+
+        /// <summary>
+        /// Another syntax error with no operator inbetween number and variable.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test8()
+        {
+            Formula f = new Formula("(2 x3");
+        }
+
+
+        /// <summary>
         /// Makes sure that "2+3" evaluates to 5.  Since the Formula
         /// contains no variables, the delegate passed in as the
         /// parameter doesn't matter.  We are passing in one that
@@ -106,6 +187,7 @@ namespace FormulaTestCases
         public void Evaluate5 ()
         {
             Formula f = new Formula("(x + y) * (z / x) * 1.0");
+            f.Evaluate(Lookup4);
             Assert.AreEqual(f.Evaluate(Lookup4), 20.0, 1e-6);
         }
 
@@ -124,6 +206,66 @@ namespace FormulaTestCases
                 case "z": return 8.0;
                 default: throw new UndefinedVariableException(v);
             }
+        }
+
+        /// <summary>
+        /// Test division being in correct order.
+        /// </summary>
+        [TestMethod]
+        public void TestEvaluate1()
+        {
+            Formula f = new Formula("4/2");
+            Assert.AreEqual(f.Evaluate(v => 0), 2.0, 1e-6);
+        }
+
+        /// <summary>
+        /// Tests multiple +'s and -'s.
+        /// </summary>
+        [TestMethod]
+        public void TestEvaluate2()
+        {
+            Formula f = new Formula("2+3+7-2-4");
+            Assert.AreEqual(f.Evaluate(v => 0), 6.0, 1e-6);
+        }
+
+        /// <summary>
+        /// Test parenthesis order.
+        /// </summary>
+        [TestMethod]
+        public void TestEvaluate3()
+        {
+            Formula f = new Formula("7-(2+3)");
+            Assert.AreEqual(f.Evaluate(v => 0), 2.0, 1e-6);
+        }
+
+        /// <summary>
+        /// Does same test as TestEvaluate3 without parenthesis.
+        /// </summary>
+        [TestMethod]
+        public void TestEvaluate4()
+        {
+            Formula f = new Formula("7-2+3");
+            Assert.AreEqual(f.Evaluate(v => 0), 8.0, 1e-6);
+        }
+
+        /// <summary>
+        /// Test multiple ordering things like parenthesis and multiplication.
+        /// </summary>
+        [TestMethod]
+        public void TestEvaluate5()
+        {
+            Formula f = new Formula("(4+6)*(8/4)*1");
+            Assert.AreEqual(f.Evaluate(v => 0), 20.0, 1e-6);
+        }
+
+        /// <summary>
+        /// Tests multiplication and division.
+        /// </summary>
+        [TestMethod]
+        public void TestEvaluate6()
+        {
+            Formula f = new Formula("2*2/4");
+            Assert.AreEqual(f.Evaluate(v => 0), 1.0, 1e-6);
         }
     }
 }
