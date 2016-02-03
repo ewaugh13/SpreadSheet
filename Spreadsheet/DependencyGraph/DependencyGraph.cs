@@ -72,6 +72,13 @@ namespace Dependencies
         /// </summary>
         public bool HasDependents(string s)
         {
+            foreach (KeyValuePair<string, string> Dep in Graph)
+            {
+                if(Dep.Key == s)
+                {
+                    return true;
+                }
+            }
             return false;
         }
 
@@ -80,6 +87,13 @@ namespace Dependencies
         /// </summary>
         public bool HasDependees(string s)
         {
+            foreach (KeyValuePair<string, string> Dep in Graph)
+            {
+                if (Dep.Value == s)
+                {
+                    return true;
+                }
+            }
             return false;
         }
 
@@ -116,10 +130,16 @@ namespace Dependencies
         /// </summary>
         public void RemoveDependency(string s, string t)
         {
-            for (int i = 0; i < Graph.Count; i++)
-            {
 
+            foreach(KeyValuePair<string, string> Dep in Graph)
+            {
+                if((Dep.Key == s) && (Dep.Value == t))
+                {
+                    
+                }
             }
+
+
         }
 
         /// <summary>
