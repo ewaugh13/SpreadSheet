@@ -49,12 +49,14 @@ namespace Dependencies
     /// </summary>
     public class DependencyGraph
     {
+        private Dictionary<string, string> Graph; 
+
         /// <summary>
         /// Creates a DependencyGraph containing no dependencies.
         /// </summary>
         public DependencyGraph()
         {
-
+            Graph = new Dictionary<string, string>();
         }
 
         /// <summary>
@@ -62,7 +64,7 @@ namespace Dependencies
         /// </summary>
         public int Size
         {
-            get { return 0; }
+            get { return Graph.Count; }
         }
 
         /// <summary>
@@ -104,7 +106,7 @@ namespace Dependencies
         /// </summary>
         public void AddDependency(string s, string t)
         {
-
+            Graph.Add(s, t);
         }
 
         /// <summary>
@@ -114,7 +116,10 @@ namespace Dependencies
         /// </summary>
         public void RemoveDependency(string s, string t)
         {
+            for (int i = 0; i < Graph.Count; i++)
+            {
 
+            }
         }
 
         /// <summary>
