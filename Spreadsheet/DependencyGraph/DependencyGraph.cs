@@ -49,14 +49,14 @@ namespace Dependencies
     /// </summary>
     public class DependencyGraph
     {
-        private Dictionary<string, string> Graph; 
+        private Dictionary<string, List<string>> Graph; 
 
         /// <summary>
         /// Creates a DependencyGraph containing no dependencies.
         /// </summary>
         public DependencyGraph()
         {
-            Graph = new Dictionary<string, string>();
+            Graph = new Dictionary<string, List<string>>();
         }
 
         /// <summary>
@@ -72,13 +72,11 @@ namespace Dependencies
         /// </summary>
         public bool HasDependents(string s)
         {
-            foreach (KeyValuePair<string, string> Dep in Graph)
+            if(Graph.ContainsKey(s))
             {
-                if(Dep.Key == s)
-                {
-                    return true;
-                }
+                return true;
             }
+            
             return false;
         }
 
@@ -87,9 +85,9 @@ namespace Dependencies
         /// </summary>
         public bool HasDependees(string s)
         {
-            foreach (KeyValuePair<string, string> Dep in Graph)
+            foreach (KeyValuePair<string, List<string>> Dep in Graph)
             {
-                if (Dep.Value == s)
+                if(Graph[Dep.Key].Contains(s))
                 {
                     return true;
                 }
@@ -102,7 +100,16 @@ namespace Dependencies
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-            return null;
+            foreach (KeyValuePair<string, List<string>> Dep in Graph)
+            {
+                if (Dep.Key == s)
+                {
+                    foreach (string value in Graph[Dep.Key])
+                    {
+                        yield return value;
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -110,7 +117,13 @@ namespace Dependencies
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
-            return null;
+            foreach (KeyValuePair<string, List<string>> Dep in Graph)
+            {
+                if (Graph[Dep.Key].Contains(s))
+                {
+                    yield return Dep.Key;
+                }
+            }
         }
 
         /// <summary>
@@ -120,7 +133,16 @@ namespace Dependencies
         /// </summary>
         public void AddDependency(string s, string t)
         {
-            Graph.Add(s, t);
+            if (Graph.ContainsKey(s))
+            {
+                Graph[s].Add(t);
+            }
+            else
+            {
+                List<string> tList = new List<string>();
+                tList.Add(t);
+                Graph.Add(s, tList);
+            }
         }
 
         /// <summary>
@@ -130,16 +152,21 @@ namespace Dependencies
         /// </summary>
         public void RemoveDependency(string s, string t)
         {
-
-            foreach(KeyValuePair<string, string> Dep in Graph)
+            foreach(KeyValuePair<string, List<string>> Dep in Graph)
             {
-                if((Dep.Key == s) && (Dep.Value == t))
+                if(Dep.Key == s)
                 {
-                    
+                    if(Dep.Value.Count > 1)
+                    {
+                        Dep.Value.Remove(t);
+                    }
+                    else
+                    {
+                        Graph.Remove(s);
+                        break;
+                    }
                 }
             }
-
-
         }
 
         /// <summary>
@@ -149,7 +176,18 @@ namespace Dependencies
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
-
+            foreach (KeyValuePair<string, List<string>> Dep in Graph)
+            {
+                if (Dep.Key == s)
+                {
+                    Graph[Dep.Key] = new List<string>();
+                    foreach (string Dependent in newDependents)
+                    {
+                        Graph[Dep.Key].Add(Dependent);
+                    }
+                    break;
+                }
+            }
         }
 
         /// <summary>
@@ -159,7 +197,37 @@ namespace Dependencies
         /// </summary>
         public void ReplaceDependees(string t, IEnumerable<string> newDependees)
         {
+            List<string> DependessToReplace = new List<string>();
 
+            foreach (KeyValuePair<string, List<string>> Dep in Graph)
+            {
+                if (Graph[Dep.Key].Contains(t))
+                {
+                    DependessToReplace.Add(Dep.Key);
+                }
+            }
+
+            foreach (string dependee in DependessToReplace)
+            {
+                RemoveDependency(dependee, t);
+            }
+
+            foreach (string newDependee in newDependees)
+            {
+                AddDependency(newDependee, t);
+            }
+
+        }
+
+        public void GetDep(string s, ref KeyValuePair<string, List<string>> theDependency)
+        {
+            foreach (KeyValuePair<string, List<string>> Dep in Graph)
+            {
+                if(Dep.Key == s)
+                {
+                    theDependency = Dep;
+                }
+            }
         }
     }
 }
