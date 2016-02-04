@@ -29,7 +29,7 @@ namespace DependencyGraphTests
             d.AddDependency("Marry", "John");
             d.AddDependency("Sally", "Jim");
             d.AddDependency("Marry", "Bob");
-            Assert.AreEqual(d.Size, 2);
+            Assert.AreEqual(d.Size, 3);
         }
 
         /// <summary>
@@ -253,7 +253,7 @@ namespace DependencyGraphTests
             newDependents.Add("Alex");
             newDependents.Add("Jake");
             d.ReplaceDependents("Sally", newDependents);
-            Assert.AreEqual(d.Size, 2);
+            Assert.AreEqual(d.Size, 3);
         }
 
         /// <summary>
@@ -271,7 +271,7 @@ namespace DependencyGraphTests
             newDependents.Add("e");
             newDependents.Add("f");
             d.ReplaceDependents("a", newDependents);
-            Assert.AreEqual(d.Size, 3);
+            Assert.AreEqual(d.Size, 4);
         }
 
         /// <summary>
@@ -307,7 +307,7 @@ namespace DependencyGraphTests
             newDependees.Add("e");
             newDependees.Add("f");
             d.ReplaceDependees("d", newDependees);
-            Assert.AreEqual(d.Size, 3);
+            Assert.AreEqual(d.Size, 4);
         }
 
         /// <summary>
@@ -332,7 +332,7 @@ namespace DependencyGraphTests
             d.AddDependency("a", "b");
             d.AddDependency("a", "c");
             d.RemoveDependency("j", "k");
-            Assert.AreEqual(d.Size, 1);
+            Assert.AreEqual(d.Size, 2);
         }
 
         /// <summary>
