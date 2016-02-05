@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("DependencyGraphTests")]
+[assembly: AssemblyTitle("DependencyGraphTestCases")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("DependencyGraphTests")]
+[assembly: AssemblyProduct("DependencyGraphTestCases")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("b9e05bcb-1fef-45fd-8de5-b287424a91aa")]
+[assembly: Guid("e5486d6f-79ca-48f4-a20c-3d9c3e823661")]
 
 // Version information for an assembly consists of the following four values:
 //
