@@ -240,6 +240,21 @@ namespace DependencyGraphTests
         }
 
         /// <summary>
+        /// This is removing (b, d) so it has the size of 3
+        /// </summary>
+        [TestMethod]
+        public void TestRemoveDependency3()
+        {
+            DependencyGraph d = new DependencyGraph();
+            d.AddDependency("a", "b");
+            d.AddDependency("a", "d");
+            d.AddDependency("b", "d");
+            d.AddDependency("d", "d");
+            d.RemoveDependency("b", "d");
+            Assert.AreEqual(d.Size, 3);
+        }
+
+        /// <summary>
         /// This replaces (sally, jim) and (sally, bob) to (sally, alex) and (sally, jake) with the size of 2
         /// </summary>
         [TestMethod]
@@ -257,14 +272,14 @@ namespace DependencyGraphTests
         }
 
         /// <summary>
-        /// This replaces (a, b) and (a, c) to (a, e) and (a, f) which has the size of 3
+        /// This replaces (a, b) and (a, d) to (a, e) and (a, f) which has the size of 3
         /// </summary>
         [TestMethod]
         public void TestRepleaceDependents2()
         {
             DependencyGraph d = new DependencyGraph();
             d.AddDependency("a", "b");
-            d.AddDependency("a", "c");
+            d.AddDependency("a", "d");
             d.AddDependency("b", "d");
             d.AddDependency("d", "d");
             List<string> newDependents = new List<string>();
@@ -308,6 +323,42 @@ namespace DependencyGraphTests
             newDependees.Add("f");
             d.ReplaceDependees("d", newDependees);
             Assert.AreEqual(d.Size, 4);
+        }
+
+        /// <summary>
+        /// This is replacing (b, d) and (d, d) to (e, d) and (f, d) with the size of 5
+        /// </summary>
+        [TestMethod]
+        public void TestRepleaceDependees3()
+        {
+            DependencyGraph d = new DependencyGraph();
+            d.AddDependency("a", "b");
+            d.AddDependency("a", "c");
+            d.AddDependency("b", "d");
+            d.AddDependency("d", "d");
+            d.AddDependency("e", "c");
+            List<string> newDependees = new List<string>();
+            newDependees.Add("e");
+            newDependees.Add("f");
+            d.ReplaceDependees("d", newDependees);
+            Assert.AreEqual(d.Size, 5);
+        }
+
+        /// <summary>
+        /// This is replacing (b, d) and (d, d) to (e, d) and (f, d) with the size of 5
+        /// </summary>
+        [TestMethod]
+        public void TestRepleaceDependees4()
+        {
+            DependencyGraph d = new DependencyGraph();
+            d.AddDependency("a", "b");
+            d.AddDependency("a", "c");
+            d.AddDependency("b", "d");
+            d.AddDependency("d", "d");
+            d.AddDependency("e", "c");
+            List<string> newDependees = new List<string>();
+            d.ReplaceDependees("d", newDependees);
+            Assert.AreEqual(d.Size, 3);
         }
 
         /// <summary>
@@ -501,6 +552,40 @@ namespace DependencyGraphTests
             }
             Assert.AreEqual(Dependess[0], "b");
             Assert.AreEqual(Dependess[1], "d");
+        }
+
+        /// <summary>
+        /// This is a test with 100,000 dependecies
+        /// </summary>
+        [TestMethod]
+        public void TestUnique100000Dependcies()
+        {
+            DependencyGraph d = new DependencyGraph();
+
+            string key = "A";
+            string value = "B";
+
+            for (int i = 0; i < 100000; i++)
+            {
+                d.AddDependency(key + i.ToString(), value + i.ToString());
+            }
+        }
+
+        /// <summary>
+        /// This is a test with 100,000 dependecies
+        /// </summary>
+        [TestMethod]
+        public void Test100000Dependcies()
+        {
+            DependencyGraph d = new DependencyGraph();
+
+            string key = "A";
+            string value = "B";
+
+            for (int i = 0; i < 100000; i++)
+            {
+                d.AddDependency(key, value + i.ToString());
+            }
         }
     }
 }
