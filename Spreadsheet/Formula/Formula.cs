@@ -124,7 +124,7 @@ namespace Formulas
                 Double value;
                 if (double.TryParse(currentToken, out value)) //Does TryParse to see if it's a number
                 {
-                    if (value > 0)
+                    if (value >= 0)
                     {
                         isValid = true;
                         typesOfTokens.Add("number");
@@ -135,30 +135,13 @@ namespace Formulas
                 {
                     isValid = true;
                     typesOfTokens.Add("variable");
-                    bool previousIsNum = false;
                     for (int k = 1; k < currentTokenCharArray.Length; k++)
                     {
-                        if (previousIsNum == false)
+                        if (!(Char.IsLetter(currentTokenCharArray[k]) || (Char.IsDigit(currentTokenCharArray[k]))))
                         {
-                            if (!(Char.IsLetter(currentTokenCharArray[k])))
-                            {
-                                if (Char.IsDigit(currentTokenCharArray[k])) //If it's not a letter it then checks for a number and if it is then it knows that the next char can't be a letter
-                                {
-                                    previousIsNum = true;
-                                }
-                                else
-                                {
-                                    isValid = false;
-                                }
-                            }
+                            isValid = false;
                         }
-                        else
-                        {
-                            if (!(Char.IsDigit(currentTokenCharArray[k])))
-                            {
-                                isValid = false;
-                            }
-                        }
+
                     }
                 }
 

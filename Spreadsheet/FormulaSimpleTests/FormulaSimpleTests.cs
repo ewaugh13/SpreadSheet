@@ -268,5 +268,22 @@ namespace FormulaTestCases
             Formula f = new Formula("2*2/4");
             Assert.AreEqual(f.Evaluate(v => 0), 1.0, 1e-6);
         }
+
+
+        [TestMethod()]
+        [ExpectedException(typeof(FormulaEvaluationException))]
+        public void Test17()
+        {
+            Formula f = new Formula("5/0");
+            f.Evaluate(s => 0);
+        }
+
+        [TestMethod()]
+        public void Test22a()
+        {
+            Formula f = new Formula("a1b2c3d4e5f6g7h8i9j10");
+            Assert.AreEqual(10, f.Evaluate(s => 10), 1e-6);
+        }
+
     }
 }
