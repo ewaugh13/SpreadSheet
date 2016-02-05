@@ -124,7 +124,7 @@ namespace Formulas
                 Double value;
                 if (double.TryParse(currentToken, out value)) //Does TryParse to see if it's a number
                 {
-                    if (value > 0)
+                    if (value >= 0)
                     {
                         isValid = true;
                         typesOfTokens.Add("number");
@@ -135,30 +135,13 @@ namespace Formulas
                 {
                     isValid = true;
                     typesOfTokens.Add("variable");
-                    bool previousIsNum = false;
                     for (int k = 1; k < currentTokenCharArray.Length; k++)
                     {
-                        if (previousIsNum == false)
+                        if (!(Char.IsLetter(currentTokenCharArray[k]) || (Char.IsDigit(currentTokenCharArray[k]))))
                         {
-                            if (!(Char.IsLetter(currentTokenCharArray[k]))) 
-                            {
-                                if (Char.IsDigit(currentTokenCharArray[k])) //If it's not a letter it then checks for a number and if it is then it knows that the next char can't be a letter
-                                {
-                                    previousIsNum = true;
-                                }
-                                else
-                                {
-                                    isValid = false;
-                                }
-                            }
+                            isValid = false;
                         }
-                        else
-                        {
-                            if (!(Char.IsDigit(currentTokenCharArray[k])))
-                            {
-                                isValid = false;
-                            }
-                        }
+
                     }
                 }
 
@@ -266,8 +249,8 @@ namespace Formulas
                 {
 
                     if (currentTuple.Item2.Equals("number")) //If the currentTuple contains a number it adds it to the valueStack and checks the operators.
-                        //If the peek of the operators is a multiply or divide it will then take the other value in valueStack and either multiply or divide 
-                        //and then restore that into the valueStack.
+                                                             //If the peek of the operators is a multiply or divide it will then take the other value in valueStack and either multiply or divide 
+                                                             //and then restore that into the valueStack.
                     {
 
                         double value;
@@ -315,8 +298,8 @@ namespace Formulas
                     }
 
                     else if (currentTuple.Item1.Equals("+") || currentTuple.Item1.Equals("-")) //Checks to see if the currentTuple is a plus or minus.
-                        //It then sees if the operators peek is another plus or minus and if it is it will calculate the value using the other number
-                        //in the valueStack and then restore it. If not it will just add the tuple to the operators.
+                                                                                               //It then sees if the operators peek is another plus or minus and if it is it will calculate the value using the other number
+                                                                                               //in the valueStack and then restore it. If not it will just add the tuple to the operators.
                     {
                         if (operators.Count > 0)
                         {
@@ -356,9 +339,9 @@ namespace Formulas
                     }
 
                     else if (currentTuple.Item2.Equals("closing parenthesis")) // Will check if operators peek if plus or minus and it so
-                        //it will calculate the value of the 2 numbers in the valueStack and restore it. It will then pop the opening parenthesis.
-                        //if the new peek of the operators is a multiply or divide it will repeate the process but will multiply or divide the 
-                        //values in the valueStack
+                                                                               //it will calculate the value of the 2 numbers in the valueStack and restore it. It will then pop the opening parenthesis.
+                                                                               //if the new peek of the operators is a multiply or divide it will repeate the process but will multiply or divide the 
+                                                                               //values in the valueStack
                     {
                         if (operators.Count > 1)
                         {
@@ -416,9 +399,9 @@ namespace Formulas
                     }
 
                     else if (currentTuple.Item2.Equals("variable")) //If the tuple is a variable it will try looking up and if it's not declared it
-                        //will throw an exception. It then does a similar process to what number checks for and will multiply or divide if it meets
-                        //what it needs to do so and store the value in the valueStack. If not it stores the value gotten from the variable in the
-                        //value stack.
+                                                                    //will throw an exception. It then does a similar process to what number checks for and will multiply or divide if it meets
+                                                                    //what it needs to do so and store the value in the valueStack. If not it stores the value gotten from the variable in the
+                                                                    //value stack.
                     {
                         double value;
                         try
@@ -457,7 +440,7 @@ namespace Formulas
 
                                 valueStack.Push(topValue);
                                 operators.Pop();
-                                
+
                             }
                             else
                             {
@@ -491,7 +474,7 @@ namespace Formulas
                             {
                                 value = lookup(currentTuple.Item1);
                             }
-                            catch(UndefinedVariableException)
+                            catch (UndefinedVariableException)
                             {
                                 throw new FormulaEvaluationException("Variables are not defined");
                             }
@@ -507,7 +490,7 @@ namespace Formulas
 
 
             if (valueStack.Count > 1) //After going through all the tokens if the valueStack has more than one element
-                //it will either subtract or add them together and  restore the value.
+                                      //it will either subtract or add them together and  restore the value.
             {
                 topTuple = operators.Peek();
                 if (topTuple.Item1.Equals("+") || topTuple.Item1.Equals("-"))
