@@ -288,6 +288,7 @@ namespace FormulaTestCases
 
 
         [TestMethod()]
+        [ExpectedException(typeof(FormulaFormatException))]
         public void TestDelegate()
         {     
             Formula f = new Formula("x2 + y + z4", ToCaps, charAndDigit);               
@@ -297,6 +298,7 @@ namespace FormulaTestCases
         public void TestDelegate2()
         {
             Formula f = new Formula("x2 + y3 + z4", ToCaps, charAndDigit);
+            f.ToString();
         }
 
 

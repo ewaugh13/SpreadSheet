@@ -50,41 +50,14 @@ namespace Formulas
         /// congruent index of tokens. It then checks to make sure the amount of both parenthesis types are the same. Lastly using
         /// the testOrder method it makes sure the formula given is in a order that is acceptable.
         /// </summary>
-        public Formula(String formula)
+        public Formula(String formula) : this(formula, norm => norm, valid => true)
         {
-            int closingParenthesis;
-            int openingParenthesis;
-            typesOfTokens = new List<string>();
-
-            Tokens = new List<string>();
-            foreach (string token in GetTokens(formula)) //Goes through each token yield returned and adds to Tokens
-            {
-                Tokens.Add(token);
-            }
-
-            if (Tokens.Count < 1)
-            {
-                throw new FormulaFormatException("Formula can't be constructed with no tokens");
-            }
-
-            testTokens(out closingParenthesis, out openingParenthesis);
-
-            if (closingParenthesis != openingParenthesis)
-            {
-                throw new FormulaFormatException("Formula can't be constructed with uneven parenthesis");
-            }
-
-            testOrder();
 
         }
 
         public Formula(String f, Normalizer N, Validator V)
         {
-            //Formula myFormula = new Formula(f);
-
-
-
-
+            
             int closingParenthesis;
             int openingParenthesis;
             typesOfTokens = new List<string>();
@@ -117,6 +90,8 @@ namespace Formulas
                 }
             }
 
+            testTokens(out closingParenthesis, out openingParenthesis);
+
             bool passesValidator = true;
             for (int i = 0; i < Tokens.Count; i++)
             {
@@ -125,7 +100,7 @@ namespace Formulas
                     passesValidator = V(Tokens[i]);
                     if(passesValidator == false)
                     {
-                        throw new UndefinedVariableException("Formula did not pass validator");
+                        throw new FormulaFormatException("Formula did not pass validator");
                     }
                 }
             }
@@ -597,19 +572,30 @@ namespace Formulas
                 }
             }
         }
-
-        /*
+        
         private ISet<string> GetVariables()
         {
+            HashSet<string> Variables = new HashSet<string>();
             for (int i = 0; i < Tokens.Count; i++)
             {
                 if(typesOfTokens[i] == "variable")
                 {
-                    yield return Tokens[i];
+                    Variables.Add(Tokens[i]);
                 }
             }
+            return Variables;
         }
-        */
+
+        public override string ToString()
+        {
+            string outPutString = "";
+            for (int i = 0; i < Tokens.Count; i++)
+            {
+                outPutString = outPutString + Tokens[i].ToString() + " ";
+            }
+            return outPutString;
+        }
+
     }
 
     /// <summary>
