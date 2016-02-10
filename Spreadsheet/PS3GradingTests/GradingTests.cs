@@ -911,7 +911,7 @@ namespace GradingTests
                 }
 
                 // Make sure everything is right
-                for (int i = 0; i < SIZE; i++)
+                for (int i = 1; i < SIZE; i++)
                 {
                     Assert.IsTrue(dents[i].SetEquals(new HashSet<string>(t.GetDependents(letters[i]))));
                     Assert.IsTrue(dees[i].SetEquals(new HashSet<string>(t.GetDependees(letters[i]))));
