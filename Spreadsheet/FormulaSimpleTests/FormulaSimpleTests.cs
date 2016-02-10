@@ -4,6 +4,7 @@
 // Corrected comment for Evaluate3 - JLZ January 29, 2016
 
 using System;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Formulas;
 
@@ -285,5 +286,36 @@ namespace FormulaTestCases
             Assert.AreEqual(10, f.Evaluate(s => 10), 1e-6);
         }
 
+
+        [TestMethod()]
+        public void TestDelegate()
+        {     
+            Formula f = new Formula("x2 + y + z4", ToCaps, charAndDigit);               
+        }
+
+        [TestMethod()]
+        public void TestDelegate2()
+        {
+            Formula f = new Formula("x2 + y3 + z4", ToCaps, charAndDigit);
+        }
+
+
+        public string ToCaps(string formula)
+        {
+            return formula.ToUpper();
+        }
+
+        public bool charAndDigit(string formula)
+        {
+            char[] chars = formula.ToCharArray();
+            if(chars.Length == 2)
+            {
+                if(Char.IsLetter(chars[0]) && Char.IsDigit(chars[1]))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

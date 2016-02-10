@@ -17,7 +17,7 @@ namespace Formulas
     /// the four binary operator symbols +, -, *, and /.  (The unary operators + and -
     /// are not allowed.)
     /// </summary>
-    public class Formula
+    public struct Formula
     {
         private List<string> Tokens { get; set; }
 
@@ -76,6 +76,59 @@ namespace Formulas
 
             testOrder();
 
+        }
+
+        public Formula(String f, Normalizer N, Validator V)
+        {
+            //Formula myFormula = new Formula(f);
+
+
+
+
+            int closingParenthesis;
+            int openingParenthesis;
+            typesOfTokens = new List<string>();
+
+            Tokens = new List<string>();
+            foreach (string token in GetTokens(f)) //Goes through each token yield returned and adds to Tokens
+            {
+                Tokens.Add(token);
+            }
+
+            if (Tokens.Count < 1)
+            {
+                throw new FormulaFormatException("Formula can't be constructed with no tokens");
+            }
+
+            testTokens(out closingParenthesis, out openingParenthesis);
+
+            if (closingParenthesis != openingParenthesis)
+            {
+                throw new FormulaFormatException("Formula can't be constructed with uneven parenthesis");
+            }
+
+            testOrder();
+
+            for (int i = 0; i < Tokens.Count; i++)
+            {
+                if(typesOfTokens[i] == "variable")
+                {
+                    Tokens[i] = N(Tokens[i]);
+                }
+            }
+
+            bool passesValidator = true;
+            for (int i = 0; i < Tokens.Count; i++)
+            {
+                if (typesOfTokens[i] == "variable") 
+                {
+                    passesValidator = V(Tokens[i]);
+                    if(passesValidator == false)
+                    {
+                        throw new UndefinedVariableException("Formula did not pass validator");
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -544,6 +597,19 @@ namespace Formulas
                 }
             }
         }
+
+        /*
+        private ISet<string> GetVariables()
+        {
+            for (int i = 0; i < Tokens.Count; i++)
+            {
+                if(typesOfTokens[i] == "variable")
+                {
+                    yield return Tokens[i];
+                }
+            }
+        }
+        */
     }
 
     /// <summary>
@@ -554,6 +620,10 @@ namespace Formulas
     /// don't is up to the implementation of the method.
     /// </summary>
     public delegate double Lookup(string s);
+
+    public delegate string Normalizer(string s);
+
+    public delegate bool Validator(string s);
 
     /// <summary>
     /// Used to report that a Lookup delegate is unable to determine the value
