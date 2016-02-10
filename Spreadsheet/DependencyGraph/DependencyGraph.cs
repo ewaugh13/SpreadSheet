@@ -101,11 +101,11 @@ namespace Dependencies
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-            foreach (KeyValuePair<string, HashSet<string>> Dep in GraphKeyDependent)
+            if (GraphKeyDependee.ContainsKey(s))
             {
-                if (GraphKeyDependent[Dep.Key].Contains(s)) // If any graph at a certain key contains s it returns the key
+                foreach (string dependent in GraphKeyDependee[s])
                 {
-                    yield return Dep.Key;
+                    yield return dependent;
                 }
             }
         }
@@ -115,11 +115,11 @@ namespace Dependencies
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
-            foreach (KeyValuePair<string, HashSet<string>> Dep in GraphKeyDependee)
+            if (GraphKeyDependent.ContainsKey(s))
             {
-                if (GraphKeyDependee[Dep.Key].Contains(s)) // If any graph at a certain key contains s it returns the key
+                foreach (string dependee in GraphKeyDependent[s])
                 {
-                    yield return Dep.Key;
+                    yield return dependee;
                 }
             }
         }
@@ -134,7 +134,6 @@ namespace Dependencies
             if (GraphKeyDependee.ContainsKey(s))
             {
                 GraphKeyDependee[s].Add(t);
-
             }
             else
             {
@@ -162,36 +161,32 @@ namespace Dependencies
         /// </summary>
         public void RemoveDependency(string s, string t)
         {
-            foreach (KeyValuePair<string, HashSet<string>> Dep in GraphKeyDependee)
+
+            if (GraphKeyDependee.ContainsKey(s))
             {
-                if (Dep.Key == s)
+                if (GraphKeyDependee[s].Count > 1) // Removes 1 element t from list
                 {
-                    if (Dep.Value.Count > 1) // Removes 1 element t from list
-                    {
-                        Dep.Value.Remove(t);
-                    }
-                    else
-                    {
-                        GraphKeyDependee.Remove(s); // Removes the dependee s
-                        break;
-                    }
+                    GraphKeyDependee[s].Remove(t);
+                }
+                else
+                {
+                    GraphKeyDependee.Remove(s); // Removes the dependee s
                 }
             }
 
-            foreach (KeyValuePair<string, HashSet<string>> Dep in GraphKeyDependent)
+
+
+            if (GraphKeyDependent.ContainsKey(t))
             {
-                if (Dep.Key == t)
+                if (GraphKeyDependent[t].Count > 1) // Removes 1 element s from list
                 {
-                    if (Dep.Value.Count > 1) // Removes 1 element s from list
-                    {
-                        Dep.Value.Remove(s);
-                    }
-                    else
-                    {
-                        GraphKeyDependent.Remove(t); // Removes the dependee t
-                        break;
-                    }
+                    GraphKeyDependent[t].Remove(s);
                 }
+                else
+                {
+                    GraphKeyDependent.Remove(t); // Removes the dependee t
+                }
+
             }
         }
 
@@ -202,19 +197,14 @@ namespace Dependencies
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
-            foreach (KeyValuePair<string, HashSet<string>> Dep in GraphKeyDependee)
+            if (GraphKeyDependee.ContainsKey(s))
             {
-                if (Dep.Key == s)
+                GraphKeyDependee[s] = new HashSet<string>(); // Creates new list of dependents and adds new dependents
+                foreach (string Dependent in newDependents)
                 {
-                    GraphKeyDependee[Dep.Key] = new HashSet<string>(); // Creates new list of dependents and adds new dependents
-                    foreach (string Dependent in newDependents)
-                    {
-                        GraphKeyDependee[Dep.Key].Add(Dependent);
-                    }
-                    break;
+                    GraphKeyDependee[s].Add(Dependent);
                 }
             }
-
 
 
             List<string> DependentsToReplace = new List<string>();
@@ -229,19 +219,16 @@ namespace Dependencies
 
             foreach (string dependent in DependentsToReplace) // Removes the Dependents
             {
-                foreach (KeyValuePair<string, HashSet<string>> Dep in GraphKeyDependent)
+                if (GraphKeyDependent.ContainsKey(dependent))
                 {
-                    if (Dep.Key == dependent)
+                    if (GraphKeyDependent[dependent].Count > 1) // Removes 1 element s from list
                     {
-                        if (Dep.Value.Count > 1) // Removes 1 element s from list
-                        {
-                            Dep.Value.Remove(s);
-                        }
-                        else
-                        {
-                            GraphKeyDependent.Remove(Dep.Key); // Removes the dependent t
-                            break;
-                        }
+                        GraphKeyDependent[dependent].Remove(s);
+                    }
+                    else
+                    {
+                        GraphKeyDependent.Remove(dependent); // Removes the dependent t
+
                     }
                 }
             }
@@ -268,20 +255,16 @@ namespace Dependencies
         /// </summary>
         public void ReplaceDependees(string t, IEnumerable<string> newDependees)
         {
-            foreach (KeyValuePair<string, HashSet<string>> Dep in GraphKeyDependent)
+
+            if (GraphKeyDependent.ContainsKey(t))
             {
-                if (Dep.Key == t)
+                GraphKeyDependent[t] = new HashSet<string>(); // Creates new list of dependees and adds new dependees
+                foreach (string Dependent in newDependees)
                 {
-                    GraphKeyDependent[Dep.Key] = new HashSet<string>(); // Creates new list of dependees and adds new dependees
-                    foreach (string Dependent in newDependees)
-                    {
-                        GraphKeyDependent[Dep.Key].Add(Dependent);
-                    }
-                    break;
+                    GraphKeyDependent[t].Add(Dependent);
                 }
+
             }
-
-
 
             List<string> DependessToReplace = new List<string>();
 
@@ -295,19 +278,15 @@ namespace Dependencies
 
             foreach (string dependee in DependessToReplace) // Removes the Dependecies
             {
-                foreach (KeyValuePair<string, HashSet<string>> Dep in GraphKeyDependee)
+                if (GraphKeyDependee.ContainsKey(dependee))
                 {
-                    if (Dep.Key == dependee)
+                    if (GraphKeyDependee[dependee].Count > 1) // Removes 1 element t from list
                     {
-                        if (Dep.Value.Count > 1) // Removes 1 element t from list
-                        {
-                            Dep.Value.Remove(t);
-                        }
-                        else
-                        {
-                            GraphKeyDependee.Remove(Dep.Key); // Removes the dependee
-                            break;
-                        }
+                        GraphKeyDependee[dependee].Remove(t);
+                    }
+                    else
+                    {
+                        GraphKeyDependee.Remove(dependee); // Removes the dependee
                     }
                 }
             }
