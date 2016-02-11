@@ -341,8 +341,8 @@ namespace FormulaTestCases
         [TestMethod()]
         [ExpectedException(typeof(FormulaFormatException))]
         public void TestDelegate()
-        {     
-            Formula f = new Formula("x2 + y + z4", ToCaps, charAndDigit);               
+        {
+            Formula f = new Formula("x2 + y + z4", ToCaps, charAndDigit);
         }
 
         [TestMethod()]
@@ -394,7 +394,30 @@ namespace FormulaTestCases
             Assert.AreEqual(myVariables.Count, 0);
         }
 
+        [TestMethod()]
+        public void TestGetVariables3()
+        {
+            Formula f1 = new Formula("x3 + y4", ToCaps, charAndDigit);
+            HashSet<string> myVariables = new HashSet<string>();
+            foreach (string var in f1.GetVariables())
+            {
+                myVariables.Add(var);
+            }
+            Assert.AreEqual(true, myVariables.Contains("X3"));
+            Assert.AreEqual(true, myVariables.Contains("Y4"));
+        }
 
+        [TestMethod()]
+        public void TestGetVariables4()
+        {
+            Formula f1 = new Formula("x3 + y4 + x3", ToCaps, charAndDigit);
+            HashSet<string> myVariables = new HashSet<string>();
+            foreach (string var in f1.GetVariables())
+            {
+                myVariables.Add(var);
+            }
+            Assert.AreEqual(myVariables.Count, 2);
+        }
 
 
         public string ToCaps(string formula)
@@ -405,9 +428,9 @@ namespace FormulaTestCases
         public bool charAndDigit(string formula)
         {
             char[] chars = formula.ToCharArray();
-            if(chars.Length == 2)
+            if (chars.Length == 2)
             {
-                if(Char.IsLetter(chars[0]) && Char.IsDigit(chars[1]))
+                if (Char.IsLetter(chars[0]) && Char.IsDigit(chars[1]))
                 {
                     return true;
                 }
