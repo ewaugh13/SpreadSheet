@@ -57,12 +57,10 @@ namespace Formulas
 
         public Formula(String f, Normalizer N, Validator V)
         {
-            
-            int closingParenthesis;
-            int openingParenthesis;
             typesOfTokens = new List<string>();
 
             Tokens = new List<string>();
+
             foreach (string token in GetTokens(f)) //Goes through each token yield returned and adds to Tokens
             {
                 Tokens.Add(token);
@@ -73,32 +71,27 @@ namespace Formulas
                 throw new FormulaFormatException("Formula can't be constructed with no tokens");
             }
 
-            testTokens(out closingParenthesis, out openingParenthesis);
-
-            if (closingParenthesis != openingParenthesis)
-            {
-                throw new FormulaFormatException("Formula can't be constructed with uneven parenthesis");
-            }
+            testTokens();
 
             testOrder();
 
             for (int i = 0; i < Tokens.Count; i++)
             {
-                if(typesOfTokens[i] == "variable")
+                if (typesOfTokens[i] == "variable")
                 {
                     Tokens[i] = N(Tokens[i]);
                 }
             }
 
-            testTokens(out closingParenthesis, out openingParenthesis);
+            testTokens();
 
             bool passesValidator = true;
             for (int i = 0; i < Tokens.Count; i++)
             {
-                if (typesOfTokens[i] == "variable") 
+                if (typesOfTokens[i] == "variable")
                 {
                     passesValidator = V(Tokens[i]);
-                    if(passesValidator == false)
+                    if (passesValidator == false)
                     {
                         throw new FormulaFormatException("Formula did not pass validator");
                     }
@@ -115,12 +108,12 @@ namespace Formulas
         /// of tokens called Tokens. To check if it's any of these 5 types a bool called isValid is set to false and will
         /// only be set to true if it's one of these 5 types.
         /// </summary>
-        private void testTokens(out int closingParenthesis, out int openingParenthesis)
+        private void testTokens()
         {
             string[] operators = { "*", "+", "-", "/" };
 
-            closingParenthesis = 0;
-            openingParenthesis = 0;
+            int closingParenthesis = 0;
+            int openingParenthesis = 0;
             typesOfTokens = new List<string>();
 
             bool isValid;
@@ -177,6 +170,11 @@ namespace Formulas
                 {
                     throw new FormulaFormatException("Formula can't be constructed with this input");
                 }
+            }
+
+            if (closingParenthesis != openingParenthesis)
+            {
+                throw new FormulaFormatException("Formula can't be constructed with uneven parenthesis");
             }
 
         }
@@ -284,44 +282,39 @@ namespace Formulas
                         double value;
                         double.TryParse(currentTuple.Item1, out value);
 
-                        if (operators.Count > 0)
+                        topTuple = operators.Peek();
+
+                        if (topTuple.Item1.Equals("*") || topTuple.Item1.Equals("/"))
                         {
-                            topTuple = operators.Peek();
+                            double topValue = valueStack.Pop();
 
-                            if (topTuple.Item1.Equals("*") || topTuple.Item1.Equals("/"))
+                            if (topTuple.Item1.Equals("*"))
                             {
-                                double topValue = valueStack.Pop();
-
-                                if (topTuple.Item1.Equals("*"))
-                                {
-                                    topValue = topValue * value;
-                                }
-                                else
-                                {
-                                    if (value == 0)
-                                    {
-                                        throw new FormulaEvaluationException("Can't divide a number by 0");
-                                    }
-                                    else
-                                    {
-                                        topValue = topValue / value;
-                                    }
-
-                                }
-
-                                valueStack.Push(topValue);
-                                operators.Pop();
-
+                                topValue = topValue * value;
                             }
                             else
                             {
-                                valueStack.Push(value);
+                                if (value == 0)
+                                {
+                                    throw new FormulaEvaluationException("Can't divide a number by 0");
+                                }
+                                else
+                                {
+                                    topValue = topValue / value;
+                                }
+
                             }
+
+                            valueStack.Push(topValue);
+                            operators.Pop();
+
                         }
                         else
                         {
                             valueStack.Push(value);
                         }
+
+
 
                     }
 
@@ -441,39 +434,33 @@ namespace Formulas
                             throw new FormulaEvaluationException("Variables are not defined");
                         }
 
-                        if (operators.Count > 0)
+
+                        topTuple = operators.Peek();
+
+                        if (topTuple.Item1.Equals("*") || topTuple.Item1.Equals("/"))
                         {
-                            topTuple = operators.Peek();
+                            double topValue = valueStack.Pop();
 
-                            if (topTuple.Item1.Equals("*") || topTuple.Item1.Equals("/"))
+                            if (topTuple.Item1.Equals("*"))
                             {
-                                double topValue = valueStack.Pop();
-
-                                if (topTuple.Item1.Equals("*"))
-                                {
-                                    topValue = topValue * value;
-                                }
-                                else
-                                {
-                                    if (value == 0)
-                                    {
-                                        throw new FormulaEvaluationException("Can't divide a number by 0");
-                                    }
-                                    else
-                                    {
-                                        topValue = topValue / value;
-                                    }
-
-                                }
-
-                                valueStack.Push(topValue);
-                                operators.Pop();
-
+                                topValue = topValue * value;
                             }
                             else
                             {
-                                valueStack.Push(value);
+                                if (value == 0)
+                                {
+                                    throw new FormulaEvaluationException("Can't divide a number by 0");
+                                }
+                                else
+                                {
+                                    topValue = topValue / value;
+                                }
+
                             }
+
+                            valueStack.Push(topValue);
+                            operators.Pop();
+
                         }
                         else
                         {
@@ -572,13 +559,13 @@ namespace Formulas
                 }
             }
         }
-        
-        private ISet<string> GetVariables()
+
+        public ISet<string> GetVariables()
         {
             HashSet<string> Variables = new HashSet<string>();
             for (int i = 0; i < Tokens.Count; i++)
             {
-                if(typesOfTokens[i] == "variable")
+                if (typesOfTokens[i] == "variable")
                 {
                     Variables.Add(Tokens[i]);
                 }

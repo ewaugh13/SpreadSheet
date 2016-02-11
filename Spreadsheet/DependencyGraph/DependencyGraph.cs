@@ -72,10 +72,15 @@ namespace Dependencies
         }
 
         /// <summary>
-        /// Reports whether dependents(s) is non-empty.  Requires s != null.
+        /// Reports whether dependents(s) is non-empty.  Requires s != null and throws exception if it is.
         /// </summary>
         public bool HasDependents(string s)
         {
+            if(s == null)
+            {
+                throw new ArgumentNullException("Input s is null");
+            }
+
             if (GraphKeyDependee.ContainsKey(s))
             {
                 return true;
@@ -85,10 +90,15 @@ namespace Dependencies
         }
 
         /// <summary>
-        /// Reports whether dependees(s) is non-empty.  Requires s != null.
+        /// Reports whether dependees(s) is non-empty.  Requires s != null and throwns exception if it is.
         /// </summary>
         public bool HasDependees(string s)
         {
+            if (s == null)
+            {
+                throw new ArgumentNullException("Input s is null");
+            }
+
             if (GraphKeyDependent.ContainsKey(s))
             {
                 return true;
@@ -97,10 +107,15 @@ namespace Dependencies
         }
 
         /// <summary>
-        /// Enumerates dependents(s).  Requires s != null.
+        /// Enumerates dependents(s).  Requires s != null and throws exception if it is.
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
+            if (s == null)
+            {
+                throw new ArgumentNullException("Input s is null");
+            }
+
             if (GraphKeyDependee.ContainsKey(s))
             {
                 foreach (string dependent in GraphKeyDependee[s])
@@ -111,10 +126,15 @@ namespace Dependencies
         }
 
         /// <summary>
-        /// Enumerates dependees(s).  Requires s != null.
+        /// Enumerates dependees(s).  Requires s != null and throws exception if it is.
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
+            if (s == null)
+            {
+                throw new ArgumentNullException("Input s is null");
+            }
+
             if (GraphKeyDependent.ContainsKey(s))
             {
                 foreach (string dependee in GraphKeyDependent[s])
@@ -127,10 +147,15 @@ namespace Dependencies
         /// <summary>
         /// Adds the dependency (s,t) to this DependencyGraph.
         /// This has no effect if (s,t) already belongs to this DependencyGraph.
-        /// Requires s != null and t != null.
+        /// Requires s != null and t != null and throws exception if either one is.
         /// </summary>
         public void AddDependency(string s, string t)
         {
+            if ((s == null) || (t == null))
+            {
+                throw new ArgumentNullException("Input s or t is null");
+            }
+
             if (GraphKeyDependee.ContainsKey(s))
             {
                 GraphKeyDependee[s].Add(t);
@@ -157,10 +182,14 @@ namespace Dependencies
         /// <summary>
         /// Removes the dependency (s,t) from this DependencyGraph.
         /// Does nothing if (s,t) doesn't belong to this DependencyGraph.
-        /// Requires s != null and t != null.
+        /// Requires s != null and t != null and throws exception if either one is.
         /// </summary>
         public void RemoveDependency(string s, string t)
         {
+            if ((s == null) || (t == null))
+            {
+                throw new ArgumentNullException("Input s or t is null");
+            }
 
             if (GraphKeyDependee.ContainsKey(s))
             {
@@ -193,10 +222,15 @@ namespace Dependencies
         /// <summary>
         /// Removes all existing dependencies of the form (s,r).  Then, for each
         /// t in newDependents, adds the dependency (s,t).
-        /// Requires s != null and t != null.
+        /// Requires s != null and t != null and throws excpetion if either one is.
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
+            if ((s == null) || (newDependents == null))
+            {
+                throw new ArgumentNullException("Input s or new depenndents is null");
+            }
+
             if (GraphKeyDependee.ContainsKey(s))
             {
                 GraphKeyDependee[s] = new HashSet<string>(); // Creates new list of dependents and adds new dependents
@@ -251,10 +285,14 @@ namespace Dependencies
         /// <summary>
         /// Removes all existing dependencies of the form (r,t).  Then, for each 
         /// s in newDependees, adds the dependency (s,t).
-        /// Requires s != null and t != null.
+        /// Requires s != null and t != null and throws exception if either one is.
         /// </summary>
         public void ReplaceDependees(string t, IEnumerable<string> newDependees)
         {
+            if ((newDependees == null) || (t == null))
+            {
+                throw new ArgumentNullException("Input newDependess or t is null");
+            }
 
             if (GraphKeyDependent.ContainsKey(t))
             {

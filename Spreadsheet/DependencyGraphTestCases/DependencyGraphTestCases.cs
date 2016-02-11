@@ -587,5 +587,78 @@ namespace DependencyGraphTests
                 d.AddDependency(key, value + i.ToString());
             }
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNull()
+        {
+            DependencyGraph d = new DependencyGraph();
+            d.AddDependency(null, null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNull2()
+        {
+            DependencyGraph d = new DependencyGraph();
+            d.AddDependency("A", "B");
+            foreach (string dependee in d.GetDependees(null))
+            {
+
+            }
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNull3()
+        {
+            DependencyGraph d = new DependencyGraph();
+            d.AddDependency("A", "B");
+            foreach (string dependent in d.GetDependents(null))
+            {
+
+            }
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNull4()
+        {
+            DependencyGraph d = new DependencyGraph();
+            d.HasDependees(null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNull5()
+        {
+            DependencyGraph d = new DependencyGraph();
+            d.HasDependents(null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNull6()
+        {
+            DependencyGraph d = new DependencyGraph();
+            d.RemoveDependency(null, null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNull7()
+        {
+            DependencyGraph d = new DependencyGraph();
+            d.ReplaceDependees(null, null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNull8()
+        {
+            DependencyGraph d = new DependencyGraph();
+            d.ReplaceDependents(null, null);
+        }
     }
 }
+    

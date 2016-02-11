@@ -130,6 +130,36 @@ namespace FormulaTestCases
             Formula f = new Formula("(2 x3");
         }
 
+        /// <summary>
+        /// Another syntax error with wrong variable format
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test9()
+        {
+            Formula f = new Formula("x2?");
+        }
+
+        /// <summary>
+        /// Another syntax error with more closing before opening
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test10()
+        {
+            Formula f = new Formula("())(");
+        }
+
+        /// <summary>
+        /// Another syntax error with operator at end
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test11()
+        {
+            Formula f = new Formula("2x + 3 +");
+        }
+
 
         /// <summary>
         /// Makes sure that "2+3" evaluates to 5.  Since the Formula
@@ -191,6 +221,17 @@ namespace FormulaTestCases
             Formula f = new Formula("(x + y) * (z / x) * 1.0");
             f.Evaluate(Lookup4);
             Assert.AreEqual(f.Evaluate(Lookup4), 20.0, 1e-6);
+        }
+
+        /// <summary>
+        /// Testing dividing by variable
+        /// </summary>
+        [TestMethod]
+        public void Evaluate6()
+        {
+            Formula f = new Formula("x / x");
+            f.Evaluate(Lookup4);
+            Assert.AreEqual(f.Evaluate(Lookup4), 1, 1e-6);
         }
 
         /// <summary>
@@ -272,22 +313,6 @@ namespace FormulaTestCases
 
 
         [TestMethod()]
-        [ExpectedException(typeof(FormulaEvaluationException))]
-        public void Test17()
-        {
-            Formula f = new Formula("5/0");
-            f.Evaluate(s => 0);
-        }
-
-        [TestMethod()]
-        public void Test22a()
-        {
-            Formula f = new Formula("a1b2c3d4e5f6g7h8i9j10");
-            Assert.AreEqual(10, f.Evaluate(s => 10), 1e-6);
-        }
-
-
-        [TestMethod()]
         [ExpectedException(typeof(FormulaFormatException))]
         public void TestDelegate()
         {     
@@ -300,6 +325,50 @@ namespace FormulaTestCases
             Formula f = new Formula("x2 + y3 + z4", ToCaps, charAndDigit);
             f.ToString();
         }
+
+        [TestMethod()]
+        public void TestToString()
+        {
+            Formula f1 = new Formula("x2 + y3 + z4", ToCaps, charAndDigit);
+            Formula f2 = new Formula(f1.ToString(), s => s, s => true);
+            Assert.AreEqual(f1.Evaluate(LookupForTestString), f2.Evaluate(LookupForTestString));
+        }
+
+        [TestMethod()]
+        public void TestDelegate4()
+        {
+            Formula f1 = new Formula("x2 + y3 + z4", ToCaps, charAndDigit);
+            Formula f2 = new Formula("x2 + y3 + z4", s => s, s => true);
+            Assert.AreEqual(f1.Evaluate(LookupForTestString), 18.0);
+            Assert.AreEqual(f2.Evaluate(LookupForTestString), 9.0);
+            Assert.AreNotEqual(f1.Evaluate(LookupForTestString), f2.Evaluate(LookupForTestString));
+        }
+
+        [TestMethod()]
+        public void TestGetVariables()
+        {
+            Formula f1 = new Formula("x2 + y3 + z4", ToCaps, charAndDigit);
+            HashSet<string> myVariables = new HashSet<string>();
+            foreach (string var in f1.GetVariables())
+            {
+                myVariables.Add(var);
+            }
+            Assert.AreEqual(myVariables.Count, 3);
+        }
+
+        [TestMethod()]
+        public void TestGetVariables2()
+        {
+            Formula f1 = new Formula("(1 + 5) / 2", ToCaps, charAndDigit);
+            HashSet<string> myVariables = new HashSet<string>();
+            foreach (string var in f1.GetVariables())
+            {
+                myVariables.Add(var);
+            }
+            Assert.AreEqual(myVariables.Count, 0);
+        }
+
+
 
 
         public string ToCaps(string formula)
@@ -318,6 +387,21 @@ namespace FormulaTestCases
                 }
             }
             return false;
+        }
+
+        public double LookupForTestString(String v)
+        {
+            switch (v)
+            {
+                case "x2": return 2.0;
+                case "y3": return 3.0;
+                case "z4": return 4.0;
+
+                case "X2": return 4.0;
+                case "Y3": return 6.0;
+                case "Z4": return 8.0;
+                default: throw new UndefinedVariableException(v);
+            }
         }
     }
 }
