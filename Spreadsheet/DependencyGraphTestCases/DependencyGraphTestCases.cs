@@ -659,6 +659,39 @@ namespace DependencyGraphTests
             DependencyGraph d = new DependencyGraph();
             d.ReplaceDependents(null, null);
         }
+
+        [TestMethod]
+        public void TestDependencyGraphUsingDependencyGraph()
+        {
+            DependencyGraph d = new DependencyGraph();
+            d.AddDependency("A", "B");
+            d.AddDependency("A", "C");
+            d.AddDependency("B", "A");
+            d.AddDependency("B", "B");
+
+            DependencyGraph d2 = new DependencyGraph(d);
+            d2.AddDependency("D", "D");
+
+            Assert.AreEqual(4, d.Size);
+            Assert.AreEqual(5, d2.Size);
+        }
+
+        [TestMethod]
+        public void TestCopyLargeGraph()
+        {
+            DependencyGraph d = new DependencyGraph();
+
+            string key = "A";
+            string value = "B";
+
+            for (int i = 0; i < 100000; i++)
+            {
+                d.AddDependency(key + i.ToString(), value + i.ToString());
+            }
+
+            DependencyGraph d2 = new DependencyGraph(d);
+
+        }
     }
 }
     

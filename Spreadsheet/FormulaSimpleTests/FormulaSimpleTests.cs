@@ -147,7 +147,7 @@ namespace FormulaTestCases
         [ExpectedException(typeof(FormulaFormatException))]
         public void Test10()
         {
-            Formula f = new Formula("())(");
+            Formula f = new Formula("(2))(");
         }
 
         /// <summary>
@@ -229,9 +229,20 @@ namespace FormulaTestCases
         [TestMethod]
         public void Evaluate6()
         {
-            Formula f = new Formula("x / x");
+            Formula f = new Formula("(x / x) / (y / y)");
             f.Evaluate(Lookup4);
             Assert.AreEqual(f.Evaluate(Lookup4), 1, 1e-6);
+        }
+
+        /// <summary>
+        /// Testing dividing by variable that is 0
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaEvaluationException))]
+        public void Evaluate7()
+        {
+            Formula f = new Formula("4 / x");
+            f.Evaluate(Lookup5);
         }
 
         /// <summary>
@@ -247,6 +258,21 @@ namespace FormulaTestCases
                 case "x": return 4.0;
                 case "y": return 6.0;
                 case "z": return 8.0;
+                default: throw new UndefinedVariableException(v);
+            }
+        }
+
+        /// <summary>
+        /// A Lookup method that maps x to 0.0.
+        /// All other variables result in an UndefinedVariableException.
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        public double Lookup5(String v)
+        {
+            switch (v)
+            {
+                case "x": return 0.0;
                 default: throw new UndefinedVariableException(v);
             }
         }
