@@ -63,6 +63,9 @@ namespace Dependencies
             GraphKeyDependent = new Dictionary<string, HashSet<string>>();
         }
 
+        /// <summary>
+        /// Creates a copy DependencyGraph based on the inputed DependencyGraph where they are independent from each other. 
+        /// </summary>
         public DependencyGraph(DependencyGraph Graph)
         {
             GraphKeyDependee = new Dictionary<string, HashSet<string>>();

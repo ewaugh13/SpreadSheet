@@ -337,7 +337,9 @@ namespace FormulaTestCases
             Assert.AreEqual(f.Evaluate(v => 0), 1.0, 1e-6);
         }
 
-
+        /// <summary>
+        /// Tests delegate with ToCaps for normalizer and tests charAndDigit for validator.
+        /// </summary>
         [TestMethod()]
         [ExpectedException(typeof(FormulaFormatException))]
         public void TestDelegate()
@@ -345,13 +347,9 @@ namespace FormulaTestCases
             Formula f = new Formula("x2 + y + z4", ToCaps, charAndDigit);
         }
 
-        [TestMethod()]
-        public void TestDelegate2()
-        {
-            Formula f = new Formula("x2 + y3 + z4", ToCaps, charAndDigit);
-            f.ToString();
-        }
-
+        /// <summary>
+        /// Tests delegate with ToCaps for normalizer and tests charAndDigit for validator than tests ToString creating equual formulas.
+        /// </summary>
         [TestMethod()]
         public void TestToString()
         {
@@ -360,6 +358,9 @@ namespace FormulaTestCases
             Assert.AreEqual(f1.Evaluate(LookupForTestString), f2.Evaluate(LookupForTestString));
         }
 
+        /// <summary>
+        /// Tests delegate with ToCaps for normalizer and tests charAndDigit for validator then tests that the lowercase and uppercase variables return different variables.
+        /// </summary>
         [TestMethod()]
         public void TestDelegate4()
         {
@@ -370,6 +371,9 @@ namespace FormulaTestCases
             Assert.AreNotEqual(f1.Evaluate(LookupForTestString), f2.Evaluate(LookupForTestString));
         }
 
+        /// <summary>
+        /// Tests getVariables with the count being 3 for variables.
+        /// </summary>
         [TestMethod()]
         public void TestGetVariables()
         {
@@ -382,6 +386,9 @@ namespace FormulaTestCases
             Assert.AreEqual(myVariables.Count, 3);
         }
 
+        /// <summary>
+        /// Tests get varialbes with the count being 0 becuase there are no variables.
+        /// </summary>
         [TestMethod()]
         public void TestGetVariables2()
         {
@@ -394,6 +401,9 @@ namespace FormulaTestCases
             Assert.AreEqual(myVariables.Count, 0);
         }
 
+        /// <summary>
+        /// Tests get variables containing X3 and Y4.
+        /// </summary>
         [TestMethod()]
         public void TestGetVariables3()
         {
@@ -407,6 +417,9 @@ namespace FormulaTestCases
             Assert.AreEqual(true, myVariables.Contains("Y4"));
         }
 
+        /// <summary>
+        /// Tests getVariables having a count of 2 because there is a repeated varaible.
+        /// </summary>
         [TestMethod()]
         public void TestGetVariables4()
         {
@@ -419,6 +432,9 @@ namespace FormulaTestCases
             Assert.AreEqual(myVariables.Count, 2);
         }
 
+        /// <summary>
+        /// Tests changing the variable to something that doesn't match the formula format.
+        /// </summary>
         [TestMethod()]
         [ExpectedException(typeof(FormulaFormatException))]
         public void TestDelegate5()
@@ -426,17 +442,37 @@ namespace FormulaTestCases
             Formula f1 = new Formula("x2 + y3 + z4", ChangeToHashTag, charAndDigit);
         }
 
+        /// <summary>
+        /// Tests empty formula giving 0 for evaulate and toString.
+        /// </summary>
+        [TestMethod()]
+        public void TestEmptyFormula()
+        {
+            Formula f1 = new Formula();
 
+            Assert.AreEqual(0, f1.Evaluate(v => 0));
+            Assert.AreEqual("0", f1.ToString());
+        }
+
+        /// <summary>
+        /// A method that returns the string formula capitilized
+        /// </summary>
         public string ToCaps(string formula)
         {
             return formula.ToUpper();
         }
 
+        /// <summary>
+        /// A method that changes each formula to a hash.
+        /// </summary>
         public string ChangeToHashTag(string formula)
         {
             return "#";
         }
 
+        /// <summary>
+        /// A method that checks if a formula is the legnth of 2 and the first element is a letter and the second is a digit.
+        /// </summary>
         public bool charAndDigit(string formula)
         {
             char[] chars = formula.ToCharArray();
@@ -450,6 +486,9 @@ namespace FormulaTestCases
             return false;
         }
 
+        /// <summary>
+        /// A method that returns values for variables in lowerCase and upperCase form used to test that the formula is different.
+        /// </summary>
         public double LookupForTestString(String v)
         {
             switch (v)

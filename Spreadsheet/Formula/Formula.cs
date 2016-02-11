@@ -55,6 +55,11 @@ namespace Formulas
 
         }
 
+        /// <summary>
+        /// Creates a Formula similar to the formula with just 1 string parameter but it also Normalizes all the variables
+        /// based on the normalizer that is inputed. It then passes all the variables through the validator to see if
+        /// they pass what the validator expects.
+        /// </summary>
         public Formula(String f, Normalizer N, Validator V)
         {
             typesOfTokens = new List<string>();
@@ -565,6 +570,10 @@ namespace Formulas
             }
         }
 
+        /// <summary>
+        /// Gets all the variables from the tokens by using the typesOfTokens to see if they are
+        /// variables and returns them as a ISet.
+        /// </summary>
         public ISet<string> GetVariables()
         {
             HashSet<string> Variables = new HashSet<string>();
@@ -578,6 +587,9 @@ namespace Formulas
             return Variables;
         }
 
+        /// <summary>
+        /// Returns the formula as a string similar to what was inputed but it has been normalized and passed the validator.
+        /// </summary>
         public override string ToString()
         {
             string outPutString = "";
@@ -611,8 +623,17 @@ namespace Formulas
     /// </summary>
     public delegate double Lookup(string s);
 
+    /// <summary>
+    /// A Normalizer method takes all the variables in a formula and changes there attributes in some way.
+    /// For example it could capitalize the variable or set it to something else entirelly.
+    /// </summary>
     public delegate string Normalizer(string s);
 
+    /// <summary>
+    /// A Vaildator method looks at all the variables in the formula and sees if it passes the
+    /// format that it wants. For example a validator could want each variable to have one letter
+    /// and one digit and if it passes it returns true and returns false if it doesn't pass.
+    /// </summary>
     public delegate bool Validator(string s);
 
     /// <summary>
