@@ -266,6 +266,11 @@ namespace Formulas
             Tuple<string, string> currentTuple;
             Tuple<string, string> topTuple;
 
+            if(Tokens == null)
+            {
+                return 0;
+            }
+
 
             for (int i = 0; i < Tokens.Count; i++)
             {
@@ -576,9 +581,21 @@ namespace Formulas
         public override string ToString()
         {
             string outPutString = "";
+
+            if(Tokens == null)
+            {
+                return "0";
+            }
             for (int i = 0; i < Tokens.Count; i++)
             {
-                outPutString = outPutString + Tokens[i].ToString() + " ";
+                if (i == 0)
+                {
+                    outPutString = outPutString + Tokens[i].ToString();
+                }
+                else
+                {
+                    outPutString = outPutString + Tokens[i].ToString() + " ";
+                }
             }
             return outPutString;
         }
