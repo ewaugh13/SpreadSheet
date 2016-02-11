@@ -868,7 +868,7 @@ namespace GradingTests
                 // Add a bunch of dependencies
                 for (int i = 0; i < SIZE; i++)
                 {
-                    for (int j = 1 + 1; j < SIZE; j++)
+                    for (int j = i + 1; j < SIZE; j++)
                     {
                         t.AddDependency(letters[i], letters[j]);
                         dents[i].Add(letters[j]);
