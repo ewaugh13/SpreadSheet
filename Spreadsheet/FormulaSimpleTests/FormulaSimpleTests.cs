@@ -419,10 +419,22 @@ namespace FormulaTestCases
             Assert.AreEqual(myVariables.Count, 2);
         }
 
+        [TestMethod()]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void TestDelegate5()
+        {
+            Formula f1 = new Formula("x2 + y3 + z4", ChangeToHashTag, charAndDigit);
+        }
+
 
         public string ToCaps(string formula)
         {
             return formula.ToUpper();
+        }
+
+        public string ChangeToHashTag(string formula)
+        {
+            return "#";
         }
 
         public bool charAndDigit(string formula)

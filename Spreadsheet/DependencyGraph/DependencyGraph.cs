@@ -66,16 +66,16 @@ namespace Dependencies
         public DependencyGraph(DependencyGraph Graph)
         {
             GraphKeyDependee = new Dictionary<string, HashSet<string>>();
-            foreach (KeyValuePair<string, HashSet<string>> Dep in Graph.GraphKeyDependee)
+            GraphKeyDependent = new Dictionary<string, HashSet<string>>();
+
+            foreach (string key in Graph.GraphKeyDependee.Keys)
             {
-                GraphKeyDependee.Add(Dep.Key, Dep.Value);
+                foreach (string value in Graph.GraphKeyDependee[key])
+                {
+                    AddDependency(key, value);
+                }
             }
 
-            GraphKeyDependent = new Dictionary<string, HashSet<string>>();
-            foreach (KeyValuePair<string, HashSet<string>> Dep in Graph.GraphKeyDependent)
-            {
-                GraphKeyDependent.Add(Dep.Key, Dep.Value);
-            }
         }
 
         /// <summary>
