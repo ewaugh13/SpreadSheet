@@ -4,6 +4,7 @@
 // Corrected comment for Evaluate3 - JLZ January 29, 2016
 
 using System;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Formulas;
 
@@ -129,6 +130,36 @@ namespace FormulaTestCases
             Formula f = new Formula("(2 x3");
         }
 
+        /// <summary>
+        /// Another syntax error with wrong variable format
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test9()
+        {
+            Formula f = new Formula("x2?");
+        }
+
+        /// <summary>
+        /// Another syntax error with more closing before opening
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test10()
+        {
+            Formula f = new Formula("(2))(");
+        }
+
+        /// <summary>
+        /// Another syntax error with operator at end
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test11()
+        {
+            Formula f = new Formula("2x + 3 +");
+        }
+
 
         /// <summary>
         /// Makes sure that "2+3" evaluates to 5.  Since the Formula
@@ -193,6 +224,28 @@ namespace FormulaTestCases
         }
 
         /// <summary>
+        /// Testing dividing by variable
+        /// </summary>
+        [TestMethod]
+        public void Evaluate6()
+        {
+            Formula f = new Formula("(x / x) / (y / y)");
+            f.Evaluate(Lookup4);
+            Assert.AreEqual(f.Evaluate(Lookup4), 1, 1e-6);
+        }
+
+        /// <summary>
+        /// Testing dividing by variable that is 0
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaEvaluationException))]
+        public void Evaluate7()
+        {
+            Formula f = new Formula("4 / x");
+            f.Evaluate(Lookup5);
+        }
+
+        /// <summary>
         /// A Lookup method that maps x to 4.0, y to 6.0, and z to 8.0.
         /// All other variables result in an UndefinedVariableException.
         /// </summary>
@@ -205,6 +258,21 @@ namespace FormulaTestCases
                 case "x": return 4.0;
                 case "y": return 6.0;
                 case "z": return 8.0;
+                default: throw new UndefinedVariableException(v);
+            }
+        }
+
+        /// <summary>
+        /// A Lookup method that maps x to 0.0.
+        /// All other variables result in an UndefinedVariableException.
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        public double Lookup5(String v)
+        {
+            switch (v)
+            {
+                case "x": return 0.0;
                 default: throw new UndefinedVariableException(v);
             }
         }
@@ -269,21 +337,171 @@ namespace FormulaTestCases
             Assert.AreEqual(f.Evaluate(v => 0), 1.0, 1e-6);
         }
 
-
+        /// <summary>
+        /// Tests delegate with ToCaps for normalizer and tests charAndDigit for validator.
+        /// </summary>
         [TestMethod()]
-        [ExpectedException(typeof(FormulaEvaluationException))]
-        public void Test17()
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void TestDelegate()
         {
-            Formula f = new Formula("5/0");
-            f.Evaluate(s => 0);
+            Formula f = new Formula("x2 + y + z4", ToCaps, charAndDigit);
         }
 
+        /// <summary>
+        /// Tests delegate with ToCaps for normalizer and tests charAndDigit for validator than tests ToString creating equual formulas.
+        /// </summary>
         [TestMethod()]
-        public void Test22a()
+        public void TestToString()
         {
-            Formula f = new Formula("a1b2c3d4e5f6g7h8i9j10");
-            Assert.AreEqual(10, f.Evaluate(s => 10), 1e-6);
+            Formula f1 = new Formula("x2 + y3 + z4", ToCaps, charAndDigit);
+            Formula f2 = new Formula(f1.ToString(), s => s, s => true);
+            Assert.AreEqual(f1.Evaluate(LookupForTestString), f2.Evaluate(LookupForTestString));
         }
 
+        /// <summary>
+        /// Tests delegate with ToCaps for normalizer and tests charAndDigit for validator then tests that the lowercase and uppercase variables return different variables.
+        /// </summary>
+        [TestMethod()]
+        public void TestDelegate4()
+        {
+            Formula f1 = new Formula("x2 + y3 + z4", ToCaps, charAndDigit);
+            Formula f2 = new Formula("x2 + y3 + z4", s => s, s => true);
+            Assert.AreEqual(f1.Evaluate(LookupForTestString), 18.0);
+            Assert.AreEqual(f2.Evaluate(LookupForTestString), 9.0);
+            Assert.AreNotEqual(f1.Evaluate(LookupForTestString), f2.Evaluate(LookupForTestString));
+        }
+
+        /// <summary>
+        /// Tests getVariables with the count being 3 for variables.
+        /// </summary>
+        [TestMethod()]
+        public void TestGetVariables()
+        {
+            Formula f1 = new Formula("x2 + y3 + z4", ToCaps, charAndDigit);
+            HashSet<string> myVariables = new HashSet<string>();
+            foreach (string var in f1.GetVariables())
+            {
+                myVariables.Add(var);
+            }
+            Assert.AreEqual(myVariables.Count, 3);
+        }
+
+        /// <summary>
+        /// Tests get varialbes with the count being 0 becuase there are no variables.
+        /// </summary>
+        [TestMethod()]
+        public void TestGetVariables2()
+        {
+            Formula f1 = new Formula("(1 + 5) / 2", ToCaps, charAndDigit);
+            HashSet<string> myVariables = new HashSet<string>();
+            foreach (string var in f1.GetVariables())
+            {
+                myVariables.Add(var);
+            }
+            Assert.AreEqual(myVariables.Count, 0);
+        }
+
+        /// <summary>
+        /// Tests get variables containing X3 and Y4.
+        /// </summary>
+        [TestMethod()]
+        public void TestGetVariables3()
+        {
+            Formula f1 = new Formula("x3 + y4", ToCaps, charAndDigit);
+            HashSet<string> myVariables = new HashSet<string>();
+            foreach (string var in f1.GetVariables())
+            {
+                myVariables.Add(var);
+            }
+            Assert.AreEqual(true, myVariables.Contains("X3"));
+            Assert.AreEqual(true, myVariables.Contains("Y4"));
+        }
+
+        /// <summary>
+        /// Tests getVariables having a count of 2 because there is a repeated varaible.
+        /// </summary>
+        [TestMethod()]
+        public void TestGetVariables4()
+        {
+            Formula f1 = new Formula("x3 + y4 + x3", ToCaps, charAndDigit);
+            HashSet<string> myVariables = new HashSet<string>();
+            foreach (string var in f1.GetVariables())
+            {
+                myVariables.Add(var);
+            }
+            Assert.AreEqual(myVariables.Count, 2);
+        }
+
+        /// <summary>
+        /// Tests changing the variable to something that doesn't match the formula format.
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void TestDelegate5()
+        {
+            Formula f1 = new Formula("x2 + y3 + z4", ChangeToHashTag, charAndDigit);
+        }
+
+        /// <summary>
+        /// Tests empty formula giving 0 for evaulate and toString.
+        /// </summary>
+        [TestMethod()]
+        public void TestEmptyFormula()
+        {
+            Formula f1 = new Formula();
+
+            Assert.AreEqual(0, f1.Evaluate(v => 0));
+            Assert.AreEqual("0", f1.ToString());
+        }
+
+        /// <summary>
+        /// A method that returns the string formula capitilized
+        /// </summary>
+        public string ToCaps(string formula)
+        {
+            return formula.ToUpper();
+        }
+
+        /// <summary>
+        /// A method that changes each formula to a hash.
+        /// </summary>
+        public string ChangeToHashTag(string formula)
+        {
+            return "#";
+        }
+
+        /// <summary>
+        /// A method that checks if a formula is the legnth of 2 and the first element is a letter and the second is a digit.
+        /// </summary>
+        public bool charAndDigit(string formula)
+        {
+            char[] chars = formula.ToCharArray();
+            if (chars.Length == 2)
+            {
+                if (Char.IsLetter(chars[0]) && Char.IsDigit(chars[1]))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// A method that returns values for variables in lowerCase and upperCase form used to test that the formula is different.
+        /// </summary>
+        public double LookupForTestString(String v)
+        {
+            switch (v)
+            {
+                case "x2": return 2.0;
+                case "y3": return 3.0;
+                case "z4": return 4.0;
+
+                case "X2": return 4.0;
+                case "Y3": return 6.0;
+                case "Z4": return 8.0;
+                default: throw new UndefinedVariableException(v);
+            }
+        }
     }
 }

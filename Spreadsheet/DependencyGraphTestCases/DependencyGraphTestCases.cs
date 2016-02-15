@@ -587,5 +587,179 @@ namespace DependencyGraphTests
                 d.AddDependency(key, value + i.ToString());
             }
         }
+
+        /// <summary>
+        /// Tests addding null in AddDependency.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNull()
+        {
+            DependencyGraph d = new DependencyGraph();
+            d.AddDependency(null, null);
+        }
+
+        /// <summary>
+        /// Tests getting null in GetDependees.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNull2()
+        {
+            DependencyGraph d = new DependencyGraph();
+            d.AddDependency("A", "B");
+            foreach (string dependee in d.GetDependees(null))
+            {
+
+            }
+        }
+
+        /// <summary>
+        /// Tests getting null in GetDependents.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNull3()
+        {
+            DependencyGraph d = new DependencyGraph();
+            d.AddDependency("A", "B");
+            foreach (string dependent in d.GetDependents(null))
+            {
+
+            }
+        }
+
+        /// <summary>
+        /// Tests has null in HasDependees.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNull4()
+        {
+            DependencyGraph d = new DependencyGraph();
+            d.HasDependees(null);
+        }
+
+        /// <summary>
+        /// Tests has null in HasDependents.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNull5()
+        {
+            DependencyGraph d = new DependencyGraph();
+            d.HasDependents(null);
+        }
+
+        /// <summary>
+        /// Tests remove null in RemoveDependency.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNull6()
+        {
+            DependencyGraph d = new DependencyGraph();
+            d.RemoveDependency(null, null);
+        }
+
+        /// <summary>
+        /// Tests Replace null in ReplaceDependees
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNull7()
+        {
+            DependencyGraph d = new DependencyGraph();
+            d.ReplaceDependees(null, null);
+        }
+
+        /// <summary>
+        /// Tests Replace null in ReplaceDependents.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestNull8()
+        {
+            DependencyGraph d = new DependencyGraph();
+            d.ReplaceDependents(null, null);
+        }
+
+        /// <summary>
+        /// Tests copying Graph and adding to one and seeing that sizes are different.
+        /// </summary>
+        [TestMethod]
+        public void TestDependencyGraphUsingDependencyGraph()
+        {
+            DependencyGraph d = new DependencyGraph();
+            d.AddDependency("A", "B");
+            d.AddDependency("A", "C");
+            d.AddDependency("B", "A");
+            d.AddDependency("B", "B");
+
+            DependencyGraph d2 = new DependencyGraph(d);
+            d2.AddDependency("D", "D");
+
+            Assert.AreEqual(4, d.Size);
+            Assert.AreEqual(5, d2.Size);
+        }
+
+        /// <summary>
+        /// Tests copying Graph and adding to one and seeing that sizes are different.
+        /// </summary>
+        [TestMethod]
+        public void TestDependencyGraphUsingDependencyGraph2()
+        {
+            DependencyGraph d = new DependencyGraph();
+            d.AddDependency("A", "B");
+            d.AddDependency("A", "C");
+            d.AddDependency("B", "A");
+            d.AddDependency("B", "B");
+
+            DependencyGraph d2 = new DependencyGraph(d);
+            d.AddDependency("D", "D");
+
+            Assert.AreEqual(5, d.Size);
+            Assert.AreEqual(4, d2.Size);
+        }
+
+        /// <summary>
+        /// Tests copying Graph and removing from one and seeing that sizes are different.
+        /// </summary>
+        [TestMethod]
+        public void TestDependencyGraphUsingDependencyGraph3()
+        {
+            DependencyGraph d = new DependencyGraph();
+            d.AddDependency("A", "B");
+            d.AddDependency("A", "C");
+            d.AddDependency("B", "A");
+            d.AddDependency("B", "B");
+
+            DependencyGraph d2 = new DependencyGraph(d);
+            d.RemoveDependency("A", "B");
+
+            Assert.AreEqual(3, d.Size);
+            Assert.AreEqual(4, d2.Size);
+        }
+
+        /// <summary>
+        /// Tests copying largevGraph.
+        /// </summary>
+        [TestMethod]
+        public void TestCopyLargeGraph()
+        {
+            DependencyGraph d = new DependencyGraph();
+
+            string key = "A";
+            string value = "B";
+
+            for (int i = 0; i < 100000; i++)
+            {
+                d.AddDependency(key + i.ToString(), value + i.ToString());
+            }
+
+            DependencyGraph d2 = new DependencyGraph(d);
+
+        }
     }
 }
+    

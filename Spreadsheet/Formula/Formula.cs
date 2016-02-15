@@ -17,7 +17,7 @@ namespace Formulas
     /// the four binary operator symbols +, -, *, and /.  (The unary operators + and -
     /// are not allowed.)
     /// </summary>
-    public class Formula
+    public struct Formula
     {
         private List<string> Tokens { get; set; }
 
@@ -50,14 +50,23 @@ namespace Formulas
         /// congruent index of tokens. It then checks to make sure the amount of both parenthesis types are the same. Lastly using
         /// the testOrder method it makes sure the formula given is in a order that is acceptable.
         /// </summary>
-        public Formula(String formula)
+        public Formula(String formula) : this(formula, norm => norm, valid => true)
         {
-            int closingParenthesis;
-            int openingParenthesis;
+
+        }
+
+        /// <summary>
+        /// Creates a Formula similar to the formula with just 1 string parameter but it also Normalizes all the variables
+        /// based on the normalizer that is inputed. It then passes all the variables through the validator to see if
+        /// they pass what the validator expects.
+        /// </summary>
+        public Formula(String f, Normalizer N, Validator V)
+        {
             typesOfTokens = new List<string>();
 
             Tokens = new List<string>();
-            foreach (string token in GetTokens(formula)) //Goes through each token yield returned and adds to Tokens
+
+            foreach (string token in GetTokens(f)) //Goes through each token yield returned and adds to Tokens
             {
                 Tokens.Add(token);
             }
@@ -67,15 +76,32 @@ namespace Formulas
                 throw new FormulaFormatException("Formula can't be constructed with no tokens");
             }
 
-            testTokens(out closingParenthesis, out openingParenthesis);
-
-            if (closingParenthesis != openingParenthesis)
-            {
-                throw new FormulaFormatException("Formula can't be constructed with uneven parenthesis");
-            }
+            testTokens();
 
             testOrder();
 
+            for (int i = 0; i < Tokens.Count; i++)
+            {
+                if (typesOfTokens[i] == "variable")
+                {
+                    Tokens[i] = N(Tokens[i]);
+                }
+            }
+
+            testTokens();
+
+            bool passesValidator = true;
+            for (int i = 0; i < Tokens.Count; i++)
+            {
+                if (typesOfTokens[i] == "variable")
+                {
+                    passesValidator = V(Tokens[i]);
+                    if (passesValidator == false)
+                    {
+                        throw new FormulaFormatException("Formula did not pass validator");
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -87,12 +113,12 @@ namespace Formulas
         /// of tokens called Tokens. To check if it's any of these 5 types a bool called isValid is set to false and will
         /// only be set to true if it's one of these 5 types.
         /// </summary>
-        private void testTokens(out int closingParenthesis, out int openingParenthesis)
+        private void testTokens()
         {
             string[] operators = { "*", "+", "-", "/" };
 
-            closingParenthesis = 0;
-            openingParenthesis = 0;
+            int closingParenthesis = 0;
+            int openingParenthesis = 0;
             typesOfTokens = new List<string>();
 
             bool isValid;
@@ -149,6 +175,11 @@ namespace Formulas
                 {
                     throw new FormulaFormatException("Formula can't be constructed with this input");
                 }
+            }
+
+            if (closingParenthesis != openingParenthesis)
+            {
+                throw new FormulaFormatException("Formula can't be constructed with uneven parenthesis");
             }
 
         }
@@ -240,6 +271,11 @@ namespace Formulas
             Tuple<string, string> currentTuple;
             Tuple<string, string> topTuple;
 
+            if(Tokens == null)
+            {
+                return 0;
+            }
+
 
             for (int i = 0; i < Tokens.Count; i++)
             {
@@ -256,44 +292,39 @@ namespace Formulas
                         double value;
                         double.TryParse(currentTuple.Item1, out value);
 
-                        if (operators.Count > 0)
+                        topTuple = operators.Peek();
+
+                        if (topTuple.Item1.Equals("*") || topTuple.Item1.Equals("/"))
                         {
-                            topTuple = operators.Peek();
+                            double topValue = valueStack.Pop();
 
-                            if (topTuple.Item1.Equals("*") || topTuple.Item1.Equals("/"))
+                            if (topTuple.Item1.Equals("*"))
                             {
-                                double topValue = valueStack.Pop();
-
-                                if (topTuple.Item1.Equals("*"))
-                                {
-                                    topValue = topValue * value;
-                                }
-                                else
-                                {
-                                    if (value == 0)
-                                    {
-                                        throw new FormulaEvaluationException("Can't divide a number by 0");
-                                    }
-                                    else
-                                    {
-                                        topValue = topValue / value;
-                                    }
-
-                                }
-
-                                valueStack.Push(topValue);
-                                operators.Pop();
-
+                                topValue = topValue * value;
                             }
                             else
                             {
-                                valueStack.Push(value);
+                                if (value == 0)
+                                {
+                                    throw new FormulaEvaluationException("Can't divide a number by 0");
+                                }
+                                else
+                                {
+                                    topValue = topValue / value;
+                                }
+
                             }
+
+                            valueStack.Push(topValue);
+                            operators.Pop();
+
                         }
                         else
                         {
                             valueStack.Push(value);
                         }
+
+
 
                     }
 
@@ -413,39 +444,33 @@ namespace Formulas
                             throw new FormulaEvaluationException("Variables are not defined");
                         }
 
-                        if (operators.Count > 0)
+
+                        topTuple = operators.Peek();
+
+                        if (topTuple.Item1.Equals("*") || topTuple.Item1.Equals("/"))
                         {
-                            topTuple = operators.Peek();
+                            double topValue = valueStack.Pop();
 
-                            if (topTuple.Item1.Equals("*") || topTuple.Item1.Equals("/"))
+                            if (topTuple.Item1.Equals("*"))
                             {
-                                double topValue = valueStack.Pop();
-
-                                if (topTuple.Item1.Equals("*"))
-                                {
-                                    topValue = topValue * value;
-                                }
-                                else
-                                {
-                                    if (value == 0)
-                                    {
-                                        throw new FormulaEvaluationException("Can't divide a number by 0");
-                                    }
-                                    else
-                                    {
-                                        topValue = topValue / value;
-                                    }
-
-                                }
-
-                                valueStack.Push(topValue);
-                                operators.Pop();
-
+                                topValue = topValue * value;
                             }
                             else
                             {
-                                valueStack.Push(value);
+                                if (value == 0)
+                                {
+                                    throw new FormulaEvaluationException("Can't divide a number by 0");
+                                }
+                                else
+                                {
+                                    topValue = topValue / value;
+                                }
+
                             }
+
+                            valueStack.Push(topValue);
+                            operators.Pop();
+
                         }
                         else
                         {
@@ -544,6 +569,49 @@ namespace Formulas
                 }
             }
         }
+
+        /// <summary>
+        /// Gets all the variables from the tokens by using the typesOfTokens to see if they are
+        /// variables and returns them as a ISet.
+        /// </summary>
+        public ISet<string> GetVariables()
+        {
+            HashSet<string> Variables = new HashSet<string>();
+            for (int i = 0; i < Tokens.Count; i++)
+            {
+                if (typesOfTokens[i] == "variable")
+                {
+                    Variables.Add(Tokens[i]);
+                }
+            }
+            return Variables;
+        }
+
+        /// <summary>
+        /// Returns the formula as a string similar to what was inputed but it has been normalized and passed the validator.
+        /// </summary>
+        public override string ToString()
+        {
+            string outPutString = "";
+
+            if(Tokens == null)
+            {
+                return "0";
+            }
+            for (int i = 0; i < Tokens.Count; i++)
+            {
+                if (i == 0)
+                {
+                    outPutString = outPutString + Tokens[i].ToString();
+                }
+                else
+                {
+                    outPutString = outPutString + Tokens[i].ToString() + " ";
+                }
+            }
+            return outPutString;
+        }
+
     }
 
     /// <summary>
@@ -554,6 +622,19 @@ namespace Formulas
     /// don't is up to the implementation of the method.
     /// </summary>
     public delegate double Lookup(string s);
+
+    /// <summary>
+    /// A Normalizer method takes all the variables in a formula and changes there attributes in some way.
+    /// For example it could capitalize the variable or set it to something else entirelly.
+    /// </summary>
+    public delegate string Normalizer(string s);
+
+    /// <summary>
+    /// A Vaildator method looks at all the variables in the formula and sees if it passes the
+    /// format that it wants. For example a validator could want each variable to have one letter
+    /// and one digit and if it passes it returns true and returns false if it doesn't pass.
+    /// </summary>
+    public delegate bool Validator(string s);
 
     /// <summary>
     /// Used to report that a Lookup delegate is unable to determine the value
