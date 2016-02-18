@@ -56,7 +56,7 @@ namespace SS
     /// </summary>
     public class Spreadsheet : AbstractSpreadsheet
     {
-        private HashSet<Cell> theSpreadSheet { get; set; }
+        private Dictionary<string, Cell> theSpreadSheet { get; set; }
 
         private DependencyGraph DepGraph { get; set; }
 
@@ -65,7 +65,7 @@ namespace SS
         /// </summary>
         public Spreadsheet()
         {
-            theSpreadSheet = new HashSet<Cell>();
+            theSpreadSheet = new Dictionary<string, Cell>();
             DepGraph = new DependencyGraph();
         }
 
@@ -75,7 +75,7 @@ namespace SS
         public override IEnumerable<string> GetNamesOfAllNonemptyCells()
         {
             HashSet<string> CellsWithNames = new HashSet<string>();
-            foreach (Cell element in theSpreadSheet)
+            foreach (Cell element in theSpreadSheet.Values)
             {
                 if ((element.contents != null) && (element.contents as string != ""))
                 {
@@ -98,7 +98,7 @@ namespace SS
                 throw new InvalidNameException();
             }
 
-            foreach (Cell element in theSpreadSheet)
+            foreach (Cell element in theSpreadSheet.Values)
             {
                 if (element.name == name)
                 {
@@ -131,29 +131,26 @@ namespace SS
 
             bool existingCell = false;
 
-            foreach (Cell element in theSpreadSheet)
+            if (theSpreadSheet.ContainsKey(name))
             {
-                if (element.name == name)
-                {
-                    existingCell = true;
-                    element.contents = number;
-                    element.value = number;
-                }
+                existingCell = true;
+                theSpreadSheet[name].contents = number;
+                theSpreadSheet[name].value = number;
             }
 
             if (existingCell == false)
             {
-                Cell newCell = new Cell(name, number);
-
-                theSpreadSheet.Add(newCell);
+                theSpreadSheet.Add(name, new Cell(name, number));
             }
 
-
-            foreach (string dependent in GetDirectDependents(name))
+            foreach (Cell element in theSpreadSheet.Values)
             {
-                cellAndDependents.Add(dependent);
+                if (theSpreadSheet[element.name].contents.ToString().Contains(name)) // does current cell contain the new cells name
+                {
+                    DepGraph.AddDependency(name, element.name);
+                    cellAndDependents.Add(element.name);
+                }
             }
-
             return cellAndDependents;
         }
 
@@ -180,22 +177,30 @@ namespace SS
 
             cellAndDependents.Add(name);
 
-            Cell newCell = new Cell(name, text);
+            bool existingCell = false;
 
-            foreach (Cell element in theSpreadSheet)
+            if (theSpreadSheet.ContainsKey(name))
             {
-                if (text.Contains(element.name))
+                existingCell = true;
+                theSpreadSheet[name].contents = text;
+            }
+
+            if (existingCell == false)
+            {
+                theSpreadSheet.Add(name, new Cell(name, text));
+            }
+
+            if (text != null)
+            {
+                foreach (Cell element in theSpreadSheet.Values)
                 {
-                    DepGraph.AddDependency(name, element.name);
+                    if (text.Contains(element.name))
+                    {
+                        DepGraph.AddDependency(name, element.name);
+                        cellAndDependents.Add(element.name);
+                    }
                 }
             }
-
-            foreach (string dependent in GetDirectDependents(name))
-            {
-                cellAndDependents.Add(dependent);
-            }
-
-            theSpreadSheet.Add(newCell);
 
             return cellAndDependents;
         }
@@ -226,24 +231,31 @@ namespace SS
 
             cellAndDependents.Add(name);
 
-            Cell newCell = new Cell(name, formula);
+            bool existingCell = false;
+
+            if (theSpreadSheet.ContainsKey(name))
+            {
+                existingCell = true;
+                theSpreadSheet[name].contents = formula;
+            }
+
+            if (existingCell == false)
+            {
+                theSpreadSheet.Add(name, new Cell(name, formula));
+                theSpreadSheet[name].value = formula.Evaluate(lookUp);
+            }
+
 
             string formulaAsString = formula.ToString();
 
-            foreach (Cell element in theSpreadSheet)
+            foreach (Cell element in theSpreadSheet.Values)
             {
                 if (formulaAsString.Contains(element.name))
                 {
-                    DepGraph.AddDependency(name, element.name);
+                    DepGraph.AddDependency(element.name, name);
+                    cellAndDependents.Add(element.name);
                 }
             }
-
-            foreach (string dependent in GetDirectDependents(name))
-            {
-                cellAndDependents.Add(dependent);
-            }
-
-            theSpreadSheet.Add(newCell);
 
             return cellAndDependents;
 
@@ -302,7 +314,7 @@ namespace SS
 
         private double lookUp(string input)
         {
-            foreach (Cell element in theSpreadSheet)
+            foreach (Cell element in theSpreadSheet.Values)
             {
                 if (element.name.Equals(input))
                 {
@@ -311,7 +323,6 @@ namespace SS
             }
             throw new UndefinedVariableException(input);
         }
-
 
     }
 

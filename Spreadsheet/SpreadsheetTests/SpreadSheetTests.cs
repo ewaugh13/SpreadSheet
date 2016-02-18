@@ -117,11 +117,29 @@ namespace SpreadsheetTests
         }
 
         [TestMethod]
-        public void TestSetUsingNumber()
+        public void TestSetUsingNumberandText()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
             sheet.SetCellContents("B5", 6);
-            sheet.GetCellContents(null);
+            HashSet<string> dependents = new HashSet<string>();
+            foreach (string s in sheet.SetCellContents("C1", "B5"))
+            {
+                dependents.Add(s);
+            }
+            Assert.AreEqual(2, dependents.Count);;
+        }
+
+        [TestMethod]
+        public void TestSetUsingNumberandText2()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetCellContents("C1", "B5");
+            HashSet<string> dependents = new HashSet<string>();
+            foreach (string s in sheet.SetCellContents("B5", 6))
+            {
+                dependents.Add(s);
+            }
+            Assert.AreEqual(2, dependents.Count);
         }
     }
 }
