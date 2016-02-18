@@ -53,6 +53,23 @@ namespace SpreadsheetTests
         }
 
         [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestSetTextNull()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();            
+            sheet.SetCellContents("Z", null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestSetFormNull()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            Formula form = new Formula();
+            sheet.SetCellContents("Z", form);
+        }
+
+        [TestMethod]
         public void TestGetNames()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
@@ -122,11 +139,12 @@ namespace SpreadsheetTests
             AbstractSpreadsheet sheet = new Spreadsheet();
             sheet.SetCellContents("B5", 6);
             HashSet<string> dependents = new HashSet<string>();
-            foreach (string s in sheet.SetCellContents("C1", "B5"))
+            Formula form = new Formula("B5 * 2");
+            foreach (string s in sheet.SetCellContents("C1", form))
             {
                 dependents.Add(s);
             }
-            Assert.AreEqual(2, dependents.Count);;
+            Assert.AreEqual(2, dependents.Count);
         }
 
         [TestMethod]
@@ -139,7 +157,17 @@ namespace SpreadsheetTests
             {
                 dependents.Add(s);
             }
-            Assert.AreEqual(2, dependents.Count);
+            Assert.AreEqual(1, dependents.Count);
+        }
+
+        [TestMethod]
+        public void TestSetReplacing()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetCellContents("C1", "B5");
+            sheet.SetCellContents("c1", "A5");
+            sheet.SetCellContents("D7", 7);
+            sheet.SetCellContents("d7", 8);
         }
     }
 }

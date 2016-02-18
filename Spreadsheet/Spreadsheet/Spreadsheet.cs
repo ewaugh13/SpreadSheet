@@ -98,14 +98,14 @@ namespace SS
                 throw new InvalidNameException();
             }
 
-            foreach (Cell element in theSpreadSheet.Values)
+            name = name.ToUpper();
+
+            if (theSpreadSheet.ContainsKey(name))
             {
-                if (element.name == name)
-                {
-                    return element.contents;
-                }
+                return theSpreadSheet[name].contents;
             }
-            throw new Exception();
+
+            return "";
         }
 
         /// <summary>
@@ -127,30 +127,23 @@ namespace SS
                 throw new InvalidNameException();
             }
 
-            cellAndDependents.Add(name);
-
-            bool existingCell = false;
+            name = name.ToUpper();
 
             if (theSpreadSheet.ContainsKey(name))
             {
-                existingCell = true;
                 theSpreadSheet[name].contents = number;
-                theSpreadSheet[name].value = number;
             }
 
-            if (existingCell == false)
+            else
             {
                 theSpreadSheet.Add(name, new Cell(name, number));
             }
 
-            foreach (Cell element in theSpreadSheet.Values)
+            foreach (string cellName in GetCellsToRecalculate(name))
             {
-                if (theSpreadSheet[element.name].contents.ToString().Contains(name)) // does current cell contain the new cells name
-                {
-                    DepGraph.AddDependency(name, element.name);
-                    cellAndDependents.Add(element.name);
-                }
+                cellAndDependents.Add(cellName);
             }
+
             return cellAndDependents;
         }
 
@@ -175,31 +168,21 @@ namespace SS
                 throw new InvalidNameException();
             }
 
-            cellAndDependents.Add(name);
-
-            bool existingCell = false;
+            name = name.ToUpper();
 
             if (theSpreadSheet.ContainsKey(name))
             {
-                existingCell = true;
                 theSpreadSheet[name].contents = text;
             }
 
-            if (existingCell == false)
+            else
             {
                 theSpreadSheet.Add(name, new Cell(name, text));
             }
 
-            if (text != null)
+            foreach (string cellName in GetCellsToRecalculate(name))
             {
-                foreach (Cell element in theSpreadSheet.Values)
-                {
-                    if (text.Contains(element.name))
-                    {
-                        DepGraph.AddDependency(name, element.name);
-                        cellAndDependents.Add(element.name);
-                    }
-                }
+                cellAndDependents.Add(cellName);
             }
 
             return cellAndDependents;
@@ -229,32 +212,30 @@ namespace SS
                 throw new InvalidNameException();
             }
 
-            cellAndDependents.Add(name);
+            name = name.ToUpper();
 
-            bool existingCell = false;
+            cellAndDependents.Add(name);
 
             if (theSpreadSheet.ContainsKey(name))
             {
-                existingCell = true;
                 theSpreadSheet[name].contents = formula;
             }
 
-            if (existingCell == false)
+            else
             {
                 theSpreadSheet.Add(name, new Cell(name, formula));
-                theSpreadSheet[name].value = formula.Evaluate(lookUp);
             }
-
 
             string formulaAsString = formula.ToString();
 
-            foreach (Cell element in theSpreadSheet.Values)
+            foreach (string variable in formula.GetVariables())
             {
-                if (formulaAsString.Contains(element.name))
-                {
-                    DepGraph.AddDependency(element.name, name);
-                    cellAndDependents.Add(element.name);
-                }
+                DepGraph.AddDependency(name, variable);
+            }
+
+            foreach (string cellName in GetCellsToRecalculate(name))
+            {
+                cellAndDependents.Add(cellName);
             }
 
             return cellAndDependents;
@@ -290,6 +271,8 @@ namespace SS
                 throw new InvalidNameException();
             }
 
+            name = name.ToUpper();
+
             foreach (string dependent in DepGraph.GetDependents(name))
             {
                 yield return dependent;
@@ -312,48 +295,25 @@ namespace SS
             return isValid;
         }
 
-        private double lookUp(string input)
-        {
-            foreach (Cell element in theSpreadSheet.Values)
-            {
-                if (element.name.Equals(input))
-                {
-                    return element.value;
-                }
-            }
-            throw new UndefinedVariableException(input);
-        }
 
     }
 
     class Cell
     {
         public string name { get; private set; }
-        public double value { get; set; }
+        public object value { get; set; }
         public object contents { get; set; }
 
         public Cell(string inputName)
         {
             name = inputName;
+            contents = "";
         }
 
-        public Cell(string inputName, double inputValue)
+        public Cell(string inputName, object inputObject)
         {
             name = inputName;
-            contents = inputValue;
-            value = inputValue;
-        }
-
-        public Cell(string inputName, string inputString)
-        {
-            name = inputName;
-            contents = inputString;
-        }
-
-        public Cell(string inputName, Formula inputFormula)
-        {
-            name = inputName;
-            contents = inputFormula;
+            contents = inputObject;
         }
     }
 }
