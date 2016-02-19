@@ -286,6 +286,9 @@ namespace SS
             }
         }
 
+        /// <summary>
+        /// Checks if the cell validates the regex
+        /// </summary>
         private bool checkCellName(string name)
         {
             bool isValid = true;
@@ -304,6 +307,9 @@ namespace SS
 
     }
 
+    /// <summary>
+    /// Creates the cell elements that contains a name, value, and contents
+    /// </summary>
     class Cell
     {
         public string name { get; private set; }

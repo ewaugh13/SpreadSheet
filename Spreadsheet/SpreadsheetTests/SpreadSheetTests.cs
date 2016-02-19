@@ -10,14 +10,21 @@ namespace SpreadsheetTests
     [TestClass]
     public class SpreadSheetTests
     {
+
+        /// <summary>
+        /// Tests adding 2 elements with doubles
+        /// </summary>
         [TestMethod]
         public void TestSetCell()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            //sheet.SetCellContents("a17", 5);
+            sheet.SetCellContents("a17", 5);
             sheet.SetCellContents("B5", 6);
         }
 
+        /// <summary>
+        /// Tests invalid name type that throws invalidNameException
+        /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
         public void TestSetCell2()
@@ -26,6 +33,9 @@ namespace SpreadsheetTests
             sheet.SetCellContents("a07", 5);
         }
 
+        /// <summary>
+        /// Tests invalid name type
+        /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
         public void TestSetCell3()
@@ -34,6 +44,9 @@ namespace SpreadsheetTests
             sheet.SetCellContents("Z", 5);
         }
 
+        /// <summary>
+        /// Test invalid name type and throws invalidNameException
+        /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
         public void TestSetCell4()
@@ -42,6 +55,9 @@ namespace SpreadsheetTests
             sheet.SetCellContents("hello", 5);
         }
 
+        /// <summary>
+        /// Tests inserting formula
+        /// </summary>
         [TestMethod]
         public void TestSetCell5()
         {
@@ -52,6 +68,9 @@ namespace SpreadsheetTests
             sheet.SetCellContents("D7", form);
         }
 
+        /// <summary>
+        /// Tests if set with invalid name
+        /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
         public void TestSetTextNull()
@@ -60,6 +79,9 @@ namespace SpreadsheetTests
             sheet.SetCellContents("Z", null);
         }
 
+        /// <summary>
+        /// Tests with invalid name
+        /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
         public void TestSetFormNull()
@@ -69,6 +91,9 @@ namespace SpreadsheetTests
             sheet.SetCellContents("Z", form);
         }
 
+        /// <summary>
+        /// Tests the amount of GetNamesOfAllNonEmptyCells which is 3
+        /// </summary>
         [TestMethod]
         public void TestGetNames()
         {
@@ -85,6 +110,9 @@ namespace SpreadsheetTests
             Assert.AreEqual(3, cellsWithName.Count);
         }
 
+        /// <summary>
+        /// Test get names of all non empty cells
+        /// </summary>
         [TestMethod]
         public void TestGetNames2()
         {
@@ -102,6 +130,9 @@ namespace SpreadsheetTests
             Assert.AreEqual(2, cellsWithName.Count);
         }
 
+        /// <summary>
+        /// Test get contents of certain cells
+        /// </summary>
         [TestMethod]
         public void TestGetContents()
         {
@@ -115,6 +146,9 @@ namespace SpreadsheetTests
             Assert.AreEqual(form, sheet.GetCellContents("D7"));
         }
 
+        /// <summary>
+        /// Tests invalid get cell contents
+        /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
         public void TestGetContents2()
@@ -124,6 +158,9 @@ namespace SpreadsheetTests
             sheet.GetCellContents("B05");
         }
 
+        /// <summary>
+        /// Test get cell contents with null
+        /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
         public void TestGetContents3()
@@ -133,6 +170,9 @@ namespace SpreadsheetTests
             sheet.GetCellContents(null);
         }
 
+        /// <summary>
+        /// Tests seting name with null
+        /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
         public void TestSetNull()
@@ -141,6 +181,9 @@ namespace SpreadsheetTests
             sheet.SetCellContents(null, "A5");
         }
 
+        /// <summary>
+        /// Tests set using number and text
+        /// </summary>
         [TestMethod]
         public void TestSetUsingNumberandText()
         {
@@ -155,6 +198,9 @@ namespace SpreadsheetTests
             Assert.AreEqual(1, dependents.Count);
         }
 
+        /// <summary>
+        /// Test sets using number and text
+        /// </summary>
         [TestMethod]
         public void TestSetUsingNumberandText2()
         {
@@ -168,6 +214,9 @@ namespace SpreadsheetTests
             Assert.AreEqual(1, dependents.Count);
         }
 
+        /// <summary>
+        /// Test the contents that contain c1 being 2
+        /// </summary>
         [TestMethod]
         public void TestSetUsingNumberandFormula()
         {
@@ -184,6 +233,9 @@ namespace SpreadsheetTests
             Assert.AreEqual(2, elementsWithC1.Count);
         }
 
+        /// <summary>
+        /// Test the contents that contain c1 being 3
+        /// </summary>
         [TestMethod]
         public void TestSetUsingNumberandFormula2()
         {
@@ -202,6 +254,9 @@ namespace SpreadsheetTests
             Assert.AreEqual(3, elementsWithC1.Count);
         }
 
+        /// <summary>
+        /// Tests replacing cells
+        /// </summary>
         [TestMethod]
         public void TestSetReplacing()
         {
@@ -212,6 +267,9 @@ namespace SpreadsheetTests
             sheet.SetCellContents("d7", 8);
         }
 
+        /// <summary>
+        /// Tests getting empty cell
+        /// </summary>
         [TestMethod]
         public void TestEmptyCell()
         {
@@ -222,6 +280,9 @@ namespace SpreadsheetTests
             Assert.AreEqual("", sheet.GetCellContents("D1"));
         }
 
+        /// <summary>
+        /// Tests replacing formulas
+        /// </summary>
         [TestMethod]
         public void TestSwitchFormula()
         {
@@ -238,6 +299,9 @@ namespace SpreadsheetTests
             Assert.AreEqual(2, elements.Count);
         }
 
+        /// <summary>
+        /// Tests replacing with a formula
+        /// </summary>
         [TestMethod]
         public void TestSwitchFormula2()
         {
@@ -247,6 +311,9 @@ namespace SpreadsheetTests
             sheet.SetCellContents("A1", form);
         }
 
+        /// <summary>
+        /// Tests creating a ciruclar expression
+        /// </summary>
         [TestMethod]
         [ExpectedException(typeof(CircularException))]
         public void TestCircularException()
@@ -260,13 +327,29 @@ namespace SpreadsheetTests
             sheet.SetCellContents("C5", form);
         }
 
+        /// <summary>
+        /// Does a strees test of lots of elements with formulas
+        /// </summary>
         [TestMethod]
         public void TestStress()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            for (int i = 0; i < 100000; i++)
+            for (int i = 1; i < 100000; i++)
             {
                 sheet.SetCellContents("A" + i.ToString(), new Formula("B" + i.ToString()));
+            }
+        }
+
+        /// <summary>
+        /// Does a stress test of lots of elements with doubles
+        /// </summary>
+        [TestMethod]
+        public void TestStress2()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            for (int i = 1; i < 100000; i++)
+            {
+                sheet.SetCellContents("A" + i.ToString(), 6);
             }
         }
     }
