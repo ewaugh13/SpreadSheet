@@ -214,23 +214,30 @@ namespace SS
 
             name = name.ToUpper();
 
-            cellAndDependents.Add(name);
-
             if (theSpreadSheet.ContainsKey(name))
             {
                 theSpreadSheet[name].contents = formula;
+                if (DepGraph.HasDependees(name))
+                {
+                    DepGraph.ReplaceDependees(name, formula.GetVariables());
+                }
+                else
+                {
+                    foreach (string variable in formula.GetVariables())
+                    {
+                        DepGraph.AddDependency(variable, name);
+                    }
+                }
             }
 
             else
             {
                 theSpreadSheet.Add(name, new Cell(name, formula));
-            }
 
-            string formulaAsString = formula.ToString();
-
-            foreach (string variable in formula.GetVariables())
-            {
-                DepGraph.AddDependency(name, variable);
+                foreach (string variable in formula.GetVariables())
+                {
+                    DepGraph.AddDependency(variable, name);
+                }
             }
 
             foreach (string cellName in GetCellsToRecalculate(name))
@@ -283,7 +290,7 @@ namespace SS
         {
             bool isValid = true;
 
-            Regex regex = new Regex(@"[a-z A-Z]+[1-9]+\d*");
+            Regex regex = new Regex(@"^[a-zA-Z]+[1-9]\d*$");
 
             Match match = regex.Match(name);
 
@@ -295,7 +302,6 @@ namespace SS
             return isValid;
         }
 
-
     }
 
     class Cell
@@ -303,12 +309,6 @@ namespace SS
         public string name { get; private set; }
         public object value { get; set; }
         public object contents { get; set; }
-
-        public Cell(string inputName)
-        {
-            name = inputName;
-            contents = "";
-        }
 
         public Cell(string inputName, object inputObject)
         {
