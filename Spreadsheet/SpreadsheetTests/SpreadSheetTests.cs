@@ -463,16 +463,30 @@ namespace SpreadsheetTests
         /// // Testing a spreadsheet with out regex
         /// </summary>
         [TestMethod()]
+        [ExpectedException(typeof(InvalidNameException))]
         public void TestSpreedWithoutRegex()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
             sheet.SetContentsOfCell("Z", 3.ToString());
-            sheet.SetContentsOfCell("hello", 3.ToString());
-            sheet.SetContentsOfCell("?", 3.ToString());
-            sheet.SetContentsOfCell("7", 3.ToString());
-            sheet.SetContentsOfCell("5", 3.ToString());
-            sheet.SetContentsOfCell("    ", 3.ToString());
-            sheet.SetContentsOfCell("1dsa6f 6a4d d", 3.ToString());
+        }
+
+        [TestMethod()]
+        [ExpectedException(typeof(CircularException))]
+        public void Test16()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+            try
+            {
+                s.SetContentsOfCell("A1", "=" + new Formula("A2+A3").ToString());
+                s.SetContentsOfCell("A2", 15.ToString());
+                s.SetContentsOfCell("A3", 30.ToString());
+                s.SetContentsOfCell("A2", "=" + new Formula("A3*A1").ToString());
+            }
+            catch (CircularException e)
+            {
+                Assert.AreEqual(15, (double)s.GetCellContents("A2"), 1e-9);
+                throw e;
+            }
         }
     }
 }

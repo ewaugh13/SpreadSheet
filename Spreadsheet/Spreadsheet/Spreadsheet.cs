@@ -272,8 +272,12 @@ namespace SS
 
             name = name.ToUpper();
 
+            object oldValue = new object();
+
             if (theSpreadSheet.ContainsKey(name))
             {
+                oldValue = theSpreadSheet[name].contents;
+
                 theSpreadSheet[name].contents = formula;
                 if (DepGraph.HasDependees(name))
                 {
@@ -298,9 +302,18 @@ namespace SS
                 }
             }
 
-            foreach (string cellName in GetCellsToRecalculate(name))
+            try
             {
-                cellAndDependents.Add(cellName);
+                foreach (string cellName in GetCellsToRecalculate(name))
+                {
+                    cellAndDependents.Add(cellName);
+                }
+            }
+
+            catch(CircularException)
+            {
+                theSpreadSheet[name].contents = oldValue;
+                throw new CircularException();
             }
 
             return cellAndDependents;
@@ -392,7 +405,6 @@ namespace SS
 
             if (theSpreadSheet[name].contents.GetType().Name.Equals("Formula"))
             {
-
                 try
                 {
                     theSpreadSheet[name].value = new Formula(theSpreadSheet[name].contents.ToString()).Evaluate(lookUp);
@@ -483,9 +495,13 @@ namespace SS
         {
             bool isValid = true;
 
-            Match match = regexValidator.Match(name);
+            Regex regex = new Regex(@"^[a-zA-Z]+[1-9]\d*$");
 
-            if (!match.Success)
+            Match match = regex.Match(name);
+
+            Match matchValidator = regexValidator.Match(name);
+
+            if (!match.Success || !matchValidator.Success)
             {
                 isValid = false;
             }
