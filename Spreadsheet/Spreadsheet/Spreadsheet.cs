@@ -80,7 +80,7 @@ namespace SS
         {
             get
             {
-                throw new NotImplementedException();
+                return Changed;
             }
 
             protected set
@@ -392,7 +392,16 @@ namespace SS
 
             if (theSpreadSheet[name].contents.GetType().Name.Equals("Formula"))
             {
-                theSpreadSheet[name].value = new Formula(theSpreadSheet[name].contents.ToString()).Evaluate(lookUp);
+
+                try
+                {
+                    theSpreadSheet[name].value = new Formula(theSpreadSheet[name].contents.ToString()).Evaluate(lookUp);
+                }
+
+                catch(FormulaEvaluationException)
+                {
+                    theSpreadSheet[name].value = new FormulaError("The formula contents and not defined in the spreadsheet");
+                }
                 return theSpreadSheet[name].value;
             }
 

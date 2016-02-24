@@ -436,15 +436,27 @@ namespace SpreadsheetTests
         }
 
         /// <summary>
-        /// // Getting value of cell with formula that is not defined
+        /// Test get cell value with formula that isn't defined
         /// </summary>
-        [TestMethod()]
-        [ExpectedException(typeof(FormulaError))]
-        public void TestGettingValue6()
+        [TestMethod]
+        public void TestGettingValu6()
         {
             AbstractSpreadsheet sheet = new Spreadsheet(regex);
-            sheet.SetContentsOfCell("A3", "=" + new Formula("A4 * 6"));
-            sheet.GetCellValue("A3");
+            sheet.SetContentsOfCell("B5", 6.ToString());
+            sheet.SetContentsOfCell("A5", "=" + new Formula("B1 * 2"));
+            Assert.AreEqual(sheet.GetCellValue("A5"), new FormulaError("The formula contents and not defined in the spreadsheet"));
+        }
+
+        /// <summary>
+        /// Test get cell value with invalid name
+        /// </summary>
+        [TestMethod]
+        public void TestGettingValu7()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("B5", "");
+            sheet.SetContentsOfCell("A5", "=" + new Formula("B5 * 2"));
+            Assert.AreEqual(sheet.GetCellValue("A5"), new FormulaError("The formula contents and not defined in the spreadsheet"));
         }
 
         /// <summary>
