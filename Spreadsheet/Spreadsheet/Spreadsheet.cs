@@ -6,21 +6,30 @@ using System.Threading.Tasks;
 using Formulas;
 using System.Text.RegularExpressions;
 using Dependencies;
+using System.IO;
 
 namespace SS
 {
 
+    // MODIFIED PARAGRAPHS 1-3 AND ADDED PARAGRAPH 4 FOR PS6
     /// <summary>
-    /// An Spreadsheet object represents the state of a simple spreadsheet.  A 
-    /// spreadsheet consists of an infinite number of named cells.
+    /// An AbstractSpreadsheet object represents the state of a simple spreadsheet.  A 
+    /// spreadsheet consists of a regular expression (called IsValid below) and an infinite 
+    /// number of named cells.
     /// 
-    /// A string is a cell name if and only if it consists of one or more letters, 
-    /// followed by a non-zero digit, followed by zero or more digits.  Cell names
-    /// are not case sensitive.
+    /// A string is a valid cell name if and only if (1) s consists of one or more letters, 
+    /// followed by a non-zero digit, followed by zero or more digits AND (2) the C#
+    /// expression IsValid.IsMatch(s.ToUpper()) is true.
     /// 
-    /// For example, "A15", "a15", "XY32", and "BC7" are cell names.  (Note that 
-    /// "A15" and "a15" name the same cell.)  On the other hand, "Z", "X07", and 
-    /// "hello" are not cell names."
+    /// For example, "A15", "a15", "XY32", and "BC7" are valid cell names, so long as they also
+    /// are accepted by IsValid.  On the other hand, "Z", "X07", and "hello" are not valid cell 
+    /// names, regardless of IsValid.
+    /// 
+    /// Any valid incoming cell name, whether passed as a parameter or embedded in a formula,
+    /// must be normalized by converting all letters to upper case before it is used by this 
+    /// this spreadsheet.  For example, the Formula "x3+a5" should be normalize to "X3+A5" before 
+    /// use.  Similarly, all cell names and Formulas that are returned or written to a file must also
+    /// be normalized.
     /// 
     /// A spreadsheet contains a cell corresponding to every possible cell name.  
     /// In addition to a name, each cell has a contents and a value.  The distinction is
@@ -60,13 +69,52 @@ namespace SS
 
         private DependencyGraph DepGraph { get; set; }
 
+        private Regex regexValidator { get; set; }
+
+        // ADDED FOR PS6
         /// <summary>
-        /// Is the spreadsheet constructor
+        /// True if this spreadsheet has been modified since it was created or saved
+        /// (whichever happened most recently); false otherwise.
+        /// </summary>
+        public override bool Changed
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            protected set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Is empty the spreadsheet constructor
         /// </summary>
         public Spreadsheet()
         {
             theSpreadSheet = new Dictionary<string, Cell>();
             DepGraph = new DependencyGraph();
+            regexValidator = new Regex(@"");
+        }
+
+        /// <summary>
+        /// Is the spreadsheet constructor with a regex parameter
+        /// </summary>
+        public Spreadsheet(Regex isValid)
+        {
+            theSpreadSheet = new Dictionary<string, Cell>();
+            DepGraph = new DependencyGraph();
+            regexValidator = isValid;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public Spreadsheet(TextReader source)
+        {
+
         }
 
         /// <summary>
@@ -168,6 +216,11 @@ namespace SS
                 throw new InvalidNameException();
             }
 
+            if (text == null)
+            {
+                throw new ArgumentNullException();
+            }
+
             name = name.ToUpper();
 
             if (theSpreadSheet.ContainsKey(name))
@@ -210,6 +263,11 @@ namespace SS
             if ((name == null) || (!checkCellName(name)))
             {
                 throw new InvalidNameException();
+            }
+
+            if (formula.Equals(null))
+            {
+                throw new ArgumentNullException();
             }
 
             name = name.ToUpper();
@@ -286,6 +344,129 @@ namespace SS
             }
         }
 
+        // ADDED FOR PS6
+        /// <summary>
+        /// Writes the contents of this spreadsheet to dest using an XML format.
+        /// The XML elements should be structured as follows:
+        ///
+        /// <spreadsheet IsValid="IsValid regex goes here">
+        ///   <cell name="cell name goes here" contents="cell contents go here"></cell>
+        ///   <cell name="cell name goes here" contents="cell contents go here"></cell>
+        ///   <cell name="cell name goes here" contents="cell contents go here"></cell>
+        /// </spreadsheet>
+        ///
+        /// The value of the isvalid attribute should be IsValid.ToString()
+        /// 
+        /// There should be one cell element for each non-empty cell in the spreadsheet.
+        /// If the cell contains a string, the string (without surrounding double quotes) should be written as the contents.
+        /// If the cell contains a double d, d.ToString() should be written as the contents.
+        /// If the cell contains a Formula f, f.ToString() with "=" prepended should be written as the contents.
+        ///
+        /// If there are any problems writing to dest, the method should throw an IOException.
+        /// </summary>
+        public override void Save(TextWriter dest)
+        {
+            throw new NotImplementedException();
+        }
+
+        // ADDED FOR PS6
+        /// <summary>
+        /// If name is null or invalid, throws an InvalidNameException.
+        ///
+        /// Otherwise, returns the value (as opposed to the contents) of the named cell.  The return
+        /// value should be either a string, a double, or a FormulaError.
+        /// </summary>
+        public override object GetCellValue(string name)
+        {
+            if ((name == null) || (!checkCellName(name)))
+            {
+                throw new InvalidNameException();
+            }
+
+            double value;
+            if (Double.TryParse(theSpreadSheet[name].contents.ToString(), out value))
+            {
+                theSpreadSheet[name].value = value;
+                return value;
+            }
+
+            if (theSpreadSheet[name].contents.GetType().Name.Equals("Formula"))
+            {
+                theSpreadSheet[name].value = new Formula(theSpreadSheet[name].contents.ToString()).Evaluate(lookUp);
+                return theSpreadSheet[name].value;
+            }
+
+            theSpreadSheet[name].value = theSpreadSheet[name].contents;
+            return theSpreadSheet[name].value;
+        }
+
+        // ADDED FOR PS6
+        /// <summary>
+        /// If content is null, throws an ArgumentNullException.
+        ///
+        /// Otherwise, if name is null or invalid, throws an InvalidNameException.
+        ///
+        /// Otherwise, if content parses as a double, the contents of the named
+        /// cell becomes that double.
+        ///
+        /// Otherwise, if content begins with the character '=', an attempt is made
+        /// to parse the remainder of content into a Formula f using the Formula
+        /// constructor with s => s.ToUpper() as the normalizer and a validator that
+        /// checks that s is a valid cell name as defined in the AbstractSpreadsheet
+        /// class comment.  There are then three possibilities:
+        ///
+        ///   (1) If the remainder of content cannot be parsed into a Formula, a
+        ///       Formulas.FormulaFormatException is thrown.
+        ///
+        ///   (2) Otherwise, if changing the contents of the named cell to be f
+        ///       would cause a circular dependency, a CircularException is thrown.
+        ///
+        ///   (3) Otherwise, the contents of the named cell becomes f.
+        ///
+        /// Otherwise, the contents of the named cell becomes content.
+        ///
+        /// If an exception is not thrown, the method returns a set consisting of
+        /// name plus the names of all other cells whose value depends, directly
+        /// or indirectly, on the named cell.
+        ///
+        /// For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
+        /// set {A1, B1, C1} is returned.
+        /// </summary>
+        public override ISet<string> SetContentsOfCell(string name, string content)
+        {
+            ISet<string> cellAndDependents = new HashSet<string>();
+
+            if ((name == null) || (!checkCellName(name)))
+            {
+                throw new InvalidNameException();
+            }
+
+            if (content == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            double value = 0;
+            if (double.TryParse(content, out value))
+            {
+                cellAndDependents = SetCellContents(name, value);
+            }
+
+            else if (content.Length > 0 && content[0] == ('='))
+            {
+                content = content.Substring(1);
+                cellAndDependents = SetCellContents(name, new Formula(content, s => s.ToUpper(), checkCellName));
+            }
+
+            else
+            {
+                cellAndDependents = SetCellContents(name, content);
+            }
+
+            return cellAndDependents;
+
+        }
+
         /// <summary>
         /// Checks if the cell validates the regex
         /// </summary>
@@ -293,9 +474,7 @@ namespace SS
         {
             bool isValid = true;
 
-            Regex regex = new Regex(@"^[a-zA-Z]+[1-9]\d*$");
-
-            Match match = regex.Match(name);
+            Match match = regexValidator.Match(name);
 
             if (!match.Success)
             {
@@ -304,6 +483,24 @@ namespace SS
 
             return isValid;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private double lookUp(string input)
+        {
+            if (theSpreadSheet.ContainsKey(input))
+            {
+                double value;
+                if (Double.TryParse(theSpreadSheet[input].contents.ToString(), out value))
+                {
+                    return value;
+                }
+            }
+            throw new UndefinedVariableException(input);
+        }
+
+
 
     }
 

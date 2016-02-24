@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SS;
 using Formulas;
 using System.Collections.Generic;
-using Dependencies;
+using System.Text.RegularExpressions;
 
 namespace SpreadsheetTests
 {
@@ -11,15 +11,17 @@ namespace SpreadsheetTests
     public class SpreadSheetTests
     {
 
+        Regex regex = new Regex(@"^[a-zA-Z]+[1-9]\d*$");
+
         /// <summary>
         /// Tests adding 2 elements with doubles
         /// </summary>
         [TestMethod]
         public void TestSetCell()
         {
-            AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("a17", 5);
-            sheet.SetCellContents("B5", 6);
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("a17", 5.ToString());
+            sheet.SetContentsOfCell("B5", 6.ToString());
         }
 
         /// <summary>
@@ -29,8 +31,8 @@ namespace SpreadsheetTests
         [ExpectedException(typeof(InvalidNameException))]
         public void TestSetCell2()
         {
-            AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("a07", 5);
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("a07", 5.ToString());
         }
 
         /// <summary>
@@ -40,8 +42,8 @@ namespace SpreadsheetTests
         [ExpectedException(typeof(InvalidNameException))]
         public void TestSetCell3()
         {
-            AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("Z", 5);
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("Z", 5.ToString());
         }
 
         /// <summary>
@@ -51,8 +53,8 @@ namespace SpreadsheetTests
         [ExpectedException(typeof(InvalidNameException))]
         public void TestSetCell4()
         {
-            AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("hello", 5);
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("hello", 5.ToString());
         }
 
         /// <summary>
@@ -61,11 +63,11 @@ namespace SpreadsheetTests
         [TestMethod]
         public void TestSetCell5()
         {
-            AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("B5", 6);
-            sheet.SetCellContents("C9", "B5");
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("B5", 6.ToString());
+            sheet.SetContentsOfCell("C9", "B5");
             Formula form = new Formula("8 / 2");
-            sheet.SetCellContents("D7", form);
+            sheet.SetContentsOfCell("D7", "=" + form.ToString());
         }
 
         /// <summary>
@@ -75,8 +77,8 @@ namespace SpreadsheetTests
         [ExpectedException(typeof(InvalidNameException))]
         public void TestSetTextNull()
         {
-            AbstractSpreadsheet sheet = new Spreadsheet();            
-            sheet.SetCellContents("Z", null);
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("Z", null);
         }
 
         /// <summary>
@@ -86,9 +88,9 @@ namespace SpreadsheetTests
         [ExpectedException(typeof(InvalidNameException))]
         public void TestSetFormNull()
         {
-            AbstractSpreadsheet sheet = new Spreadsheet();
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
             Formula form = new Formula();
-            sheet.SetCellContents("Z", form);
+            sheet.SetContentsOfCell("Z", "=" + form.ToString());
         }
 
         /// <summary>
@@ -97,11 +99,11 @@ namespace SpreadsheetTests
         [TestMethod]
         public void TestGetNames()
         {
-            AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("B5", 6);
-            sheet.SetCellContents("C9", "B5");
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("B5", 6.ToString());
+            sheet.SetContentsOfCell("C9", "B5");
             Formula form = new Formula("8 / 2");
-            sheet.SetCellContents("D7", form);
+            sheet.SetContentsOfCell("D7", "=" + form.ToString());
             List<string> cellsWithName = new List<string>();
             foreach (string cellName in sheet.GetNamesOfAllNonemptyCells())
             {
@@ -116,12 +118,11 @@ namespace SpreadsheetTests
         [TestMethod]
         public void TestGetNames2()
         {
-            AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("B5", null);
-            sheet.SetCellContents("C9", "B5");
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("C9", "B5");
             Formula form = new Formula("8 / 2");
-            sheet.SetCellContents("D7", form);
-            sheet.SetCellContents("E4", "");
+            sheet.SetContentsOfCell("D7", "=" + form.ToString());
+            sheet.SetContentsOfCell("E4", "");
             List<string> cellsWithName = new List<string>();
             foreach (string cellName in sheet.GetNamesOfAllNonemptyCells())
             {
@@ -136,14 +137,14 @@ namespace SpreadsheetTests
         [TestMethod]
         public void TestGetContents()
         {
-            AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("B5", 6);
-            sheet.SetCellContents("C9", "B5");
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("B5", 6.ToString());
+            sheet.SetContentsOfCell("C9", "B5");
             Formula form = new Formula("8 / 2");
-            sheet.SetCellContents("D7", form);
+            sheet.SetContentsOfCell("D7", "=" + form.ToString());
             Assert.AreEqual(6.0, sheet.GetCellContents("B5"));
             Assert.AreEqual("B5", sheet.GetCellContents("C9"));
-            Assert.AreEqual(form, sheet.GetCellContents("D7"));
+            Assert.AreEqual(form.ToString(), sheet.GetCellContents("D7").ToString());
         }
 
         /// <summary>
@@ -153,8 +154,8 @@ namespace SpreadsheetTests
         [ExpectedException(typeof(InvalidNameException))]
         public void TestGetContents2()
         {
-            AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("B5", 6);
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("B5", 6.ToString());
             sheet.GetCellContents("B05");
         }
 
@@ -165,8 +166,8 @@ namespace SpreadsheetTests
         [ExpectedException(typeof(InvalidNameException))]
         public void TestGetContents3()
         {
-            AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("B5", 6);
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("B5", 6.ToString());
             sheet.GetCellContents(null);
         }
 
@@ -177,8 +178,8 @@ namespace SpreadsheetTests
         [ExpectedException(typeof(InvalidNameException))]
         public void TestSetNull()
         {
-            AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents(null, "A5");
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell(null, "A5");
         }
 
         /// <summary>
@@ -187,11 +188,11 @@ namespace SpreadsheetTests
         [TestMethod]
         public void TestSetUsingNumberandText()
         {
-            AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("B5", 6);
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("B5", 6.ToString());
             HashSet<string> dependents = new HashSet<string>();
             Formula form = new Formula("B5 * 2");
-            foreach (string s in sheet.SetCellContents("C1", form))
+            foreach (string s in sheet.SetContentsOfCell("C1", "=" + form.ToString()))
             {
                 dependents.Add(s);
             }
@@ -204,10 +205,10 @@ namespace SpreadsheetTests
         [TestMethod]
         public void TestSetUsingNumberandText2()
         {
-            AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("C1", "B5");
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("C1", "B5");
             HashSet<string> dependents = new HashSet<string>();
-            foreach (string s in sheet.SetCellContents("B5", 6))
+            foreach (string s in sheet.SetContentsOfCell("B5", 6.ToString()))
             {
                 dependents.Add(s);
             }
@@ -220,13 +221,13 @@ namespace SpreadsheetTests
         [TestMethod]
         public void TestSetUsingNumberandFormula()
         {
-            AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("B5", 6);
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("B5", 6.ToString());
             HashSet<string> elementsWithC1 = new HashSet<string>();
             Formula form = new Formula("B5 * 2");
             Formula form2 = new Formula("C1");
-            sheet.SetCellContents("D1", form2);
-            foreach (string s in sheet.SetCellContents("C1", form))
+            sheet.SetContentsOfCell("D1", "=" + form2.ToString());
+            foreach (string s in sheet.SetContentsOfCell("C1", "=" + form.ToString()))
             {
                 elementsWithC1.Add(s);
             }
@@ -239,15 +240,15 @@ namespace SpreadsheetTests
         [TestMethod]
         public void TestSetUsingNumberandFormula2()
         {
-            AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("B5", 6);
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("B5", 6.ToString());
             HashSet<string> elementsWithC1 = new HashSet<string>();
             Formula form = new Formula("B5 * 2");
             Formula form2 = new Formula("C1");
             Formula form3 = new Formula("D1");
-            sheet.SetCellContents("D1", form2);
-            sheet.SetCellContents("E1", form3);
-            foreach (string s in sheet.SetCellContents("C1", form))
+            sheet.SetContentsOfCell("D1", "=" + form2.ToString());
+            sheet.SetContentsOfCell("E1", "=" + form3.ToString());
+            foreach (string s in sheet.SetContentsOfCell("C1", "=" + form.ToString()))
             {
                 elementsWithC1.Add(s);
             }
@@ -260,11 +261,11 @@ namespace SpreadsheetTests
         [TestMethod]
         public void TestSetReplacing()
         {
-            AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("C1", "B5");
-            sheet.SetCellContents("c1", "A5");
-            sheet.SetCellContents("D7", 7);
-            sheet.SetCellContents("d7", 8);
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("C1", "B5");
+            sheet.SetContentsOfCell("c1", "A5");
+            sheet.SetContentsOfCell("D7", 7.ToString());
+            sheet.SetContentsOfCell("d7", 8.ToString());
         }
 
         /// <summary>
@@ -273,8 +274,8 @@ namespace SpreadsheetTests
         [TestMethod]
         public void TestEmptyCell()
         {
-            AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("C1", "");
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("C1", "");
             Assert.AreEqual("", sheet.GetCellContents("c1"));
             Assert.AreEqual("", sheet.GetCellContents("C1"));
             Assert.AreEqual("", sheet.GetCellContents("D1"));
@@ -286,13 +287,13 @@ namespace SpreadsheetTests
         [TestMethod]
         public void TestSwitchFormula()
         {
-            AbstractSpreadsheet sheet = new Spreadsheet();
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
             Formula form = new Formula("B1 + C1");
-            sheet.SetCellContents("A1", form);
+            sheet.SetContentsOfCell("A1", "=" + form.ToString());
             form = new Formula("D1 + E1");
-            sheet.SetCellContents("A1", form);
+            sheet.SetContentsOfCell("A1", "=" + form.ToString());
             HashSet<string> elements = new HashSet<string>();
-            foreach (string item in sheet.SetCellContents("E1", 2))
+            foreach (string item in sheet.SetContentsOfCell("E1", 2.ToString()))
             {
                 elements.Add(item);
             }
@@ -305,10 +306,10 @@ namespace SpreadsheetTests
         [TestMethod]
         public void TestSwitchFormula2()
         {
-            AbstractSpreadsheet sheet = new Spreadsheet();
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
             Formula form = new Formula("B1 + C1");
-            sheet.SetCellContents("A1", 2);
-            sheet.SetCellContents("A1", form);
+            sheet.SetContentsOfCell("A1", 2.ToString());
+            sheet.SetContentsOfCell("A1", "=" + form.ToString());
         }
 
         /// <summary>
@@ -318,13 +319,13 @@ namespace SpreadsheetTests
         [ExpectedException(typeof(CircularException))]
         public void TestCircularException()
         {
-            AbstractSpreadsheet sheet = new Spreadsheet();
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
             Formula form = new Formula("A5");
             Formula form2 = new Formula("B5");
             Formula form3 = new Formula("C5");
-            sheet.SetCellContents("A5", form2);
-            sheet.SetCellContents("B5", form3);
-            sheet.SetCellContents("C5", form);
+            sheet.SetContentsOfCell("A5", "=" + form2.ToString());
+            sheet.SetContentsOfCell("B5", "=" + form3.ToString());
+            sheet.SetContentsOfCell("C5", "=" + form.ToString());
         }
 
         /// <summary>
@@ -333,10 +334,10 @@ namespace SpreadsheetTests
         [TestMethod]
         public void TestStress()
         {
-            AbstractSpreadsheet sheet = new Spreadsheet();
-            for (int i = 1; i < 100000; i++)
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            for (int i = 1; i < 10000; i++)
             {
-                sheet.SetCellContents("A" + i.ToString(), new Formula("B" + i.ToString()));
+                sheet.SetContentsOfCell("A" + i.ToString(), "=" + (new Formula("B" + i.ToString())).ToString());
             }
         }
 
@@ -346,11 +347,120 @@ namespace SpreadsheetTests
         [TestMethod]
         public void TestStress2()
         {
-            AbstractSpreadsheet sheet = new Spreadsheet();
-            for (int i = 1; i < 100000; i++)
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            for (int i = 1; i < 10000; i++)
             {
-                sheet.SetCellContents("A" + i.ToString(), 6);
+                sheet.SetContentsOfCell("A" + i.ToString(), 6.ToString());
             }
+        }
+
+        /// <summary>
+        /// // SETTING CELL TO A STRING
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void Test7()
+        {
+            AbstractSpreadsheet s = new Spreadsheet(regex);
+            s.SetContentsOfCell("A8", (string)null);
+        }
+
+        /// <summary>
+        /// Tests the vailidator for a formula format exception
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void FormulaException()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("A2", "=" + new Formula("Z"));
+        }
+
+        /// <summary>
+        /// // Getting value of cell
+        /// </summary>
+        [TestMethod()]
+        public void TestGettingValue()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("A2", 6.ToString());
+            sheet.SetContentsOfCell("A3", "=" + new Formula("B3"));
+            Assert.AreEqual(6.0, sheet.GetCellValue("A2"));       
+        }
+
+        /// <summary>
+        /// // Getting value of cell with formula
+        /// </summary>
+        [TestMethod()]
+        public void TestGettingValue2()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("A2", 6.ToString());
+            sheet.SetContentsOfCell("A3", "=" + new Formula("A2 * 6"));
+            Assert.AreEqual(36.0, sheet.GetCellValue("A3"));
+        }
+
+        /// <summary>
+        /// // Getting value of cell with string
+        /// </summary>
+        [TestMethod()]
+        public void TestGettingValue3()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("A2", "name");
+            Assert.AreEqual("name", sheet.GetCellValue("A2"));
+        }
+
+        /// <summary>
+        /// Test get cell value with null
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestGettingValu4()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("B5", 6.ToString());
+            sheet.GetCellValue(null);
+        }
+
+        /// <summary>
+        /// Test get cell value with invalid name
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestGettingValu5()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("B5", 6.ToString());
+            sheet.GetCellValue("Z");
+        }
+
+        /// <summary>
+        /// // Getting value of cell with formula that is not defined
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(FormulaError))]
+        public void TestGettingValue6()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet(regex);
+            sheet.SetContentsOfCell("A3", "=" + new Formula("A4 * 6"));
+            sheet.GetCellValue("A3");
+        }
+
+        /// <summary>
+        /// // Testing a spreadsheet with out regex
+        /// </summary>
+        [TestMethod()]
+        public void TestSpreedWithoutRegex()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("Z", 3.ToString());
+            sheet.SetContentsOfCell("hello", 3.ToString());
+            sheet.SetContentsOfCell("?", 3.ToString());
+            sheet.SetContentsOfCell("7", 3.ToString());
+            sheet.SetContentsOfCell("5", 3.ToString());
+            sheet.SetContentsOfCell("    ", 3.ToString());
+            sheet.SetContentsOfCell("1dsa6f 6a4d d", 3.ToString());
         }
     }
 }
