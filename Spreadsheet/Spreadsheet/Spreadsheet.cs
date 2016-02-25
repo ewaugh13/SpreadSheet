@@ -72,11 +72,11 @@ namespace SS
 
         private DependencyGraph DepGraph { get; set; }
 
-        private Regex regexValidator { get; set; }
+        private Regex regexValidator = new Regex(@"^[a-zA-Z]+[1-9]\d*$");
 
         private Regex IsValid { get; set; }
 
-        private bool changed = false;
+        private bool changed;
 
         // ADDED FOR PS6
         /// <summary>
@@ -87,12 +87,12 @@ namespace SS
         {
             get
             {
-                return this.Changed;
+                return changed;
             }
 
             protected set
             {
-                this.Changed = changed;
+                changed = value;
             }
         }
 
@@ -104,8 +104,7 @@ namespace SS
             theSpreadSheet = new Dictionary<string, Cell>();
             DepGraph = new DependencyGraph();
             Changed = false;
-            IsValid = new Regex(@"^[a-zA-Z]+[1-9]\d*$");
-            regexValidator = new Regex(@"");
+            IsValid = new Regex(@"");
         }
 
         /// <summary>
@@ -116,8 +115,7 @@ namespace SS
             theSpreadSheet = new Dictionary<string, Cell>();
             Changed = false;
             DepGraph = new DependencyGraph();
-            regexValidator = isValid;
-            IsValid = new Regex(@"^[a-zA-Z]+[1-9]\d*$");
+            IsValid = isValid;
         }
 
         /// <summary>
@@ -127,6 +125,7 @@ namespace SS
         {
             theSpreadSheet = new Dictionary<string, Cell>();
             DepGraph = new DependencyGraph();
+            Changed = false;
 
             XmlSchemaSet schemaSet = new XmlSchemaSet();
 
@@ -453,7 +452,7 @@ namespace SS
 
                     else if (theSpreadSheet[cellElement].contents is double)
                     {
-                        writer.WriteAttributeString("contents", theSpreadSheet[cellElement].ToString());
+                        writer.WriteAttributeString("contents", theSpreadSheet[cellElement].contents.ToString());
                     }
 
                     else if (theSpreadSheet[cellElement].contents is Formula)
@@ -470,7 +469,7 @@ namespace SS
                 writer.WriteEndElement();
                 writer.WriteEndDocument();
             }
-            changed = false;
+            Changed = false;
         }
 
         // ADDED FOR PS6
@@ -621,8 +620,6 @@ namespace SS
         {
             throw new SpreadsheetReadException("Validation failed");
         }
-
-
 
     }
 
