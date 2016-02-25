@@ -74,7 +74,7 @@ namespace SS
 
         private Regex regexValidator { get; set; }
 
-        private Regex isValid;
+        private Regex IsValid { get; set; }
 
         private bool changed = false;
 
@@ -103,7 +103,8 @@ namespace SS
         {
             theSpreadSheet = new Dictionary<string, Cell>();
             DepGraph = new DependencyGraph();
-            //changed
+            Changed = false;
+            IsValid = new Regex(@"^[a-zA-Z]+[1-9]\d*$");
             regexValidator = new Regex(@"");
         }
 
@@ -113,8 +114,10 @@ namespace SS
         public Spreadsheet(Regex isValid)
         {
             theSpreadSheet = new Dictionary<string, Cell>();
+            Changed = false;
             DepGraph = new DependencyGraph();
             regexValidator = isValid;
+            IsValid = new Regex(@"^[a-zA-Z]+[1-9]\d*$");
         }
 
         /// <summary>
@@ -143,7 +146,7 @@ namespace SS
                         case "spreadsheet":
                             if (reader.NodeType != XmlNodeType.EndElement)
                             {
-                                isValid = new Regex(reader["IsValid"]);
+                                IsValid = new Regex(reader["IsValid"]);
                             }
                             break;
                         case "cell":
@@ -430,7 +433,7 @@ namespace SS
             {
                 writer.WriteStartDocument();
                 writer.WriteStartElement("spreadsheet");
-                writer.WriteAttributeString("IsValid", isValid.ToString());
+                writer.WriteAttributeString("IsValid", IsValid.ToString());
 
                 List<string> cellsWithValues = new List<string>();
 
@@ -583,20 +586,18 @@ namespace SS
         /// </summary>
         private bool checkCellName(string name)
         {
-            bool isValid = true;
+            bool IsValidBool = true;
 
-            Regex regex = new Regex(@"^[a-zA-Z]+[1-9]\d*$");
-
-            Match match = regex.Match(name);
+            Match match = IsValid.Match(name);
 
             Match matchValidator = regexValidator.Match(name);
 
             if (!match.Success || !matchValidator.Success)
             {
-                isValid = false;
+                IsValidBool = false;
             }
 
-            return isValid;
+            return IsValidBool;
         }
 
         /// <summary>
