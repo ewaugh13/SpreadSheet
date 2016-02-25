@@ -7,6 +7,9 @@ using Formulas;
 using System.Text.RegularExpressions;
 using Dependencies;
 using System.IO;
+using System.Xml;
+using System.Xml.Schema;
+
 
 namespace SS
 {
@@ -71,6 +74,10 @@ namespace SS
 
         private Regex regexValidator { get; set; }
 
+        private Regex isValid;
+
+        private bool changed = false;
+
         // ADDED FOR PS6
         /// <summary>
         /// True if this spreadsheet has been modified since it was created or saved
@@ -80,12 +87,12 @@ namespace SS
         {
             get
             {
-                return Changed;
+                return this.Changed;
             }
 
             protected set
             {
-                throw new NotImplementedException();
+                this.Changed = changed;
             }
         }
 
@@ -96,6 +103,7 @@ namespace SS
         {
             theSpreadSheet = new Dictionary<string, Cell>();
             DepGraph = new DependencyGraph();
+            //changed
             regexValidator = new Regex(@"");
         }
 
@@ -114,6 +122,45 @@ namespace SS
         /// </summary>
         public Spreadsheet(TextReader source)
         {
+            theSpreadSheet = new Dictionary<string, Cell>();
+            DepGraph = new DependencyGraph();
+
+            XmlSchemaSet schemaSet = new XmlSchemaSet();
+
+            schemaSet.Add(null, "Spreadsheet.xsd");
+
+            XmlReaderSettings settings = new XmlReaderSettings();
+            settings.ValidationType = ValidationType.Schema;
+            settings.Schemas = schemaSet;
+            settings.ValidationEventHandler += ValidationCallback;
+
+            using (XmlReader reader = XmlReader.Create(source, settings))
+            {
+                while (reader.Read())
+                {
+                    switch (reader.Name)
+                    {
+                        case "spreadsheet":
+                            if (reader.NodeType != XmlNodeType.EndElement)
+                            {
+                                isValid = new Regex(reader["IsValid"]);
+                            }
+                            break;
+                        case "cell":
+                            SetContentsOfCell(reader["name"], reader["contents"]);
+                            break;
+                    }
+                }
+            }
+
+            foreach (string element in GetNamesOfAllNonemptyCells())
+            {
+                if (theSpreadSheet[element].value is FormulaError)
+                {
+                    throw new SpreadsheetReadException("Formula error");
+                }
+            }
+
 
         }
 
@@ -310,7 +357,7 @@ namespace SS
                 }
             }
 
-            catch(CircularException)
+            catch (CircularException)
             {
                 theSpreadSheet[name].contents = oldValue;
                 throw new CircularException();
@@ -379,7 +426,48 @@ namespace SS
         /// </summary>
         public override void Save(TextWriter dest)
         {
-            throw new NotImplementedException();
+            using (XmlWriter writer = XmlWriter.Create(dest))
+            {
+                writer.WriteStartDocument();
+                writer.WriteStartElement("spreadsheet");
+                writer.WriteAttributeString("IsValid", isValid.ToString());
+
+                List<string> cellsWithValues = new List<string>();
+
+                foreach (string cellElement in GetNamesOfAllNonemptyCells())
+                {
+                    cellsWithValues.Add(cellElement);
+                }
+
+                foreach(string cellElement in cellsWithValues)
+                {
+                    writer.WriteStartElement("cell");
+                    writer.WriteAttributeString("name", cellElement);
+                    if(theSpreadSheet[cellElement].contents is string)
+                    {
+                        writer.WriteAttributeString("contents", (string)theSpreadSheet[cellElement].contents);
+                    }
+
+                    else if (theSpreadSheet[cellElement].contents is double)
+                    {
+                        writer.WriteAttributeString("contents", theSpreadSheet[cellElement].ToString());
+                    }
+
+                    else if (theSpreadSheet[cellElement].contents is Formula)
+                    {
+                        writer.WriteAttributeString("contents", "=" + theSpreadSheet[cellElement].contents.ToString());
+                    }
+
+                    else if (theSpreadSheet[cellElement].contents is FormulaError)
+                    {
+                        writer.WriteAttributeString("contents", "=" + theSpreadSheet[cellElement].contents.ToString());
+                    }
+                }
+
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+            }
+            changed = false;
         }
 
         // ADDED FOR PS6
@@ -410,7 +498,7 @@ namespace SS
                     theSpreadSheet[name].value = new Formula(theSpreadSheet[name].contents.ToString()).Evaluate(lookUp);
                 }
 
-                catch(FormulaEvaluationException)
+                catch (FormulaEvaluationException)
                 {
                     theSpreadSheet[name].value = new FormulaError("The formula contents and not defined in the spreadsheet");
                 }
@@ -484,6 +572,8 @@ namespace SS
                 cellAndDependents = SetCellContents(name, content);
             }
 
+            Changed = true;
+
             return cellAndDependents;
 
         }
@@ -523,6 +613,12 @@ namespace SS
                 }
             }
             throw new UndefinedVariableException(input);
+        }
+
+        // Display any validation errors.
+        private static void ValidationCallback(object sender, ValidationEventArgs e)
+        {
+            throw new SpreadsheetReadException("Validation failed");
         }
 
 

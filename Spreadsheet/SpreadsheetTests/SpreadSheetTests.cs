@@ -4,6 +4,9 @@ using SS;
 using Formulas;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.IO;
+
+
 
 namespace SpreadsheetTests
 {
@@ -385,7 +388,7 @@ namespace SpreadsheetTests
             AbstractSpreadsheet sheet = new Spreadsheet(regex);
             sheet.SetContentsOfCell("A2", 6.ToString());
             sheet.SetContentsOfCell("A3", "=" + new Formula("B3"));
-            Assert.AreEqual(6.0, sheet.GetCellValue("A2"));       
+            Assert.AreEqual(6.0, sheet.GetCellValue("A2"));
         }
 
         /// <summary>
@@ -486,6 +489,36 @@ namespace SpreadsheetTests
             {
                 Assert.AreEqual(15, (double)s.GetCellContents("A2"), 1e-9);
                 throw e;
+            }
+        }
+
+        [TestMethod()]
+        public void TestXmlSave()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+
+            s.SetContentsOfCell("A1", "=" + new Formula("A2+A3").ToString());
+            s.SetContentsOfCell("A2", 15.ToString());
+            s.SetContentsOfCell("A3", 30.ToString());
+
+            using (TextWriter test = File.CreateText("C:\\Users\\_____\\Desktop||text.xml"))
+            {
+                s.Save(test);
+            }
+        }
+
+        [TestMethod()]
+        public void TestXmlSaver()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+
+            s.SetContentsOfCell("A1", "=" + new Formula("A2+A3").ToString());
+            s.SetContentsOfCell("A2", 15.ToString());
+            s.SetContentsOfCell("A3", 30.ToString());
+
+            using (TextWriter test = File.CreateText("C:\\Users\\_____\\Desktop||text.xml"))
+            {
+                s.Save(test);
             }
         }
     }
