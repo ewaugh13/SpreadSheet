@@ -492,6 +492,7 @@ namespace SpreadsheetTests
             }
         }
 
+        /*
         [TestMethod()]
         public void TestXmlSave()
         {
@@ -501,12 +502,13 @@ namespace SpreadsheetTests
             s.SetContentsOfCell("A2", 15.ToString());
             s.SetContentsOfCell("A3", 30.ToString());
 
-            using (TextWriter test = File.CreateText("C:\\Users\\_____\\Desktop||text.xml"))
+            using (TextWriter test = File.CreateText("C:\\Users\\Owner\\Desktop||text.xml"))
             {
                 s.Save(test);
             }
         }
 
+        
         [TestMethod()]
         public void TestXmlSaver()
         {
@@ -521,5 +523,6 @@ namespace SpreadsheetTests
                 s.Save(test);
             }
         }
+        */
     }
 }
