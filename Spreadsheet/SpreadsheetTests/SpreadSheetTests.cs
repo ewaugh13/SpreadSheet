@@ -536,7 +536,7 @@ namespace SpreadsheetTests
             s.SetContentsOfCell("A3", "Hello");
             s.SetContentsOfCell("A4", "=A2 * 2");
 
-            using (TextWriter test = File.CreateText("C:\\Users\\Owner\\Desktop\\text.xml"))
+            using (TextWriter test = File.CreateText("../../text.xml"))
             {
                 s.Save(test);
             }
@@ -549,7 +549,21 @@ namespace SpreadsheetTests
             s.SetContentsOfCell("A3", "Hello");
             s.SetContentsOfCell("A4", "=A2 * 2");
 
-            using (TextWriter test = File.CreateText("C:\\Users\\Owner\\Desktop\\text2.xml"))
+            using (TextWriter test = File.CreateText("../../text2.xml"))
+            {
+                s.Save(test);
+            }
+        }
+
+        [TestMethod()]
+        [ExpectedException(typeof(IOException))]
+        public void TestXmlSave3()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A3", "Hello");
+            s.SetContentsOfCell("A4", "=A2 * 2");
+
+            using (TextWriter test = File.CreateText("dajlffjadkl;fajkl;ds"))
             {
                 s.Save(test);
             }
@@ -559,7 +573,7 @@ namespace SpreadsheetTests
         public void TestXml()
         {
             AbstractSpreadsheet sheet;
-            using (TextReader test = File.OpenText("C:\\Users\\Owner\\Desktop\\text.xml"))
+            using (TextReader test = File.OpenText("../../text.xml"))
             {
                 sheet = new Spreadsheet(test);
             }
@@ -580,7 +594,7 @@ namespace SpreadsheetTests
         public void TestXml2()
         {
             AbstractSpreadsheet sheet;
-            using (TextReader test = File.OpenText("C:\\Users\\Owner\\Desktop\\text2.xml"))
+            using (TextReader test = File.OpenText("../../text2.xml"))
             {
                 sheet = new Spreadsheet(test);
             }
