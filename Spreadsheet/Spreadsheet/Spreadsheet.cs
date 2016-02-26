@@ -157,7 +157,22 @@ namespace SS
                                 }
                                 break;
                             case "cell":
-                                SetContentsOfCell(reader["name"], reader["contents"]);
+                                try
+                                {
+                                    SetContentsOfCell(reader["name"], reader["contents"]);
+                                }
+                                catch(CircularException)
+                                {
+                                    throw new SpreadsheetReadException("Circular exception");
+                                }
+                                catch (InvalidNameException)
+                                {
+                                    throw new SpreadsheetReadException("Invalid name error");
+                                }
+                                catch (FormulaFormatException)
+                                {
+                                    throw new SpreadsheetReadException("Formula format error");
+                                }
                                 break;
                         }
                     }
@@ -177,20 +192,9 @@ namespace SS
 
             foreach (string element in GetNamesOfAllNonemptyCells())
             {
-                if (theSpreadSheet[element].contents is Formula)
+                if (theSpreadSheet[element].value is FormulaError)
                 {
-                    try
-                    {
-                        theSpreadSheet[element].value = new Formula(theSpreadSheet[element].contents.ToString()).Evaluate(lookUp);
-                    }
-                    catch (FormulaEvaluationException)
-                    {
-                        theSpreadSheet[element].value = new FormulaError();
-                    }
-                    if (theSpreadSheet[element].value is FormulaError)
-                    {
-                        throw new SpreadsheetReadException("Formula error");
-                    }
+                    throw new SpreadsheetReadException("Formula error");
                 }
             }
 
