@@ -119,7 +119,7 @@ namespace SS
         }
 
         /// <summary>
-        /// 
+        /// Creates a spreadsheet from source textreader
         /// </summary>
         public Spreadsheet(TextReader source)
         {
@@ -658,7 +658,7 @@ namespace SS
         }
 
         /// <summary>
-        /// 
+        /// Looks up the value for the evauluator
         /// </summary>
         private double lookUp(string input)
         {

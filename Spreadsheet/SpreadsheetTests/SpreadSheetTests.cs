@@ -23,9 +23,6 @@ namespace SpreadsheetTests
             sheet.SetContentsOfCell("A2", 3.ToString());
         }
 
-
-
-
         /// <summary>
         /// Tests invalid name type that throws invalidNameException
         /// </summary>
@@ -472,6 +469,9 @@ namespace SpreadsheetTests
             sheet.SetContentsOfCell("Z", 3.ToString());
         }
 
+        /// <summary>
+        /// // Tests for circular exception and that the value was reset
+        /// </summary>
         [TestMethod()]
         [ExpectedException(typeof(CircularException))]
         public void Test16()
@@ -491,6 +491,9 @@ namespace SpreadsheetTests
             }
         }
 
+        /// <summary>
+        /// Tests getting cell value
+        /// </summary>
         [TestMethod()]
         public void TestCellValue()
         {
@@ -503,6 +506,9 @@ namespace SpreadsheetTests
             Assert.AreEqual(24.0, sheet.GetCellValue("A2"));
         }
 
+        /// <summary>
+        /// Tests getting cell value
+        /// </summary>
         [TestMethod()]
         public void TestCellValue2()
         {
@@ -512,6 +518,9 @@ namespace SpreadsheetTests
             Assert.AreEqual(new FormulaError().GetType(), sheet.GetCellValue("A2").GetType());
         }
 
+        /// <summary>
+        /// Tests with extra regex
+        /// </summary>
         [TestMethod()]
         public void TestSetWithExtraRegex()
         {
@@ -519,6 +528,9 @@ namespace SpreadsheetTests
             sheet.SetContentsOfCell("M2", 5.ToString());
         }
 
+        /// <summary>
+        /// Tests with extra regex
+        /// </summary>
         [TestMethod()]
         [ExpectedException(typeof(InvalidNameException))]
         public void TestSetWithExtraRegex2()
@@ -527,6 +539,9 @@ namespace SpreadsheetTests
             sheet.SetContentsOfCell("N2", 5.ToString());
         }
 
+        /// <summary>
+        /// Tests xml save
+        /// </summary>
         [TestMethod()]
         public void TestXmlSave()
         {
@@ -542,6 +557,9 @@ namespace SpreadsheetTests
             }
         }
 
+        /// <summary>
+        /// Tests xml save
+        /// </summary>
         [TestMethod()]
         public void TestXmlSave2()
         {
@@ -555,20 +573,9 @@ namespace SpreadsheetTests
             }
         }
 
-        [TestMethod()]
-        [ExpectedException(typeof(IOException))]
-        public void TestXmlSave3()
-        {
-            AbstractSpreadsheet s = new Spreadsheet();
-            s.SetContentsOfCell("A3", "Hello");
-            s.SetContentsOfCell("A4", "=A2 * 2");
-
-            using (TextWriter test = File.CreateText("dajlffjadkl;fajkl;ds"))
-            {
-                s.Save(test);
-            }
-        }
-
+        /// <summary>
+        /// Tests xml save and that the value is changed
+        /// </summary>
         [TestMethod()]
         public void TestXml()
         {
@@ -589,8 +596,10 @@ namespace SpreadsheetTests
 
         }
 
+        /// <summary>
+        /// Tests creating spreadsheet of source
+        /// </summary>
         [TestMethod()]
-        [ExpectedException(typeof(SpreadsheetReadException))]
         public void TestXml2()
         {
             AbstractSpreadsheet sheet;
@@ -600,6 +609,9 @@ namespace SpreadsheetTests
             }
         }
 
+        /// <summary>
+        /// Tests for null source
+        /// </summary>
         [TestMethod()]
         [ExpectedException(typeof(ArgumentNullException))]
         public void TestXml3()
@@ -611,30 +623,60 @@ namespace SpreadsheetTests
             }
         }
 
+        /// <summary>
+        /// Tests for spreadsheetReadException
+        /// </summary>
         [TestMethod()]
-        public void TestLarge()
+        [ExpectedException(typeof(SpreadsheetReadException))]
+        public void TestXml4()
         {
-            AbstractSpreadsheet s = new Spreadsheet();
-            for (int i = 0; i < 500; i++)
+            AbstractSpreadsheet sheet;
+            using (TextReader test = File.OpenText("../../text3.xml"))
             {
-                s.SetContentsOfCell("A1" + i, "=" + new Formula("A1" + (i + 1)).ToString());
+                sheet = new Spreadsheet(test);
             }
+        }
 
-            ISet<string> sss = s.SetContentsOfCell("A1499", 25.0.ToString());
-            Assert.AreEqual(500, sss.Count);
-            for (int i = 0; i < 500; i++)
+        /// <summary>
+        /// Tests for spreadsheetReadException
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(SpreadsheetReadException))]
+        public void TestXml5()
+        {
+            AbstractSpreadsheet sheet;
+            using (TextReader test = File.OpenText("../../text4.xml"))
             {
-                Assert.IsTrue(sss.Contains("A1" + i));
+                sheet = new Spreadsheet(test);
             }
+        }
 
-            sss = s.SetContentsOfCell("A1249", 25.0.ToString());
-            Assert.AreEqual(250, sss.Count);
-            for (int i = 0; i < 250; i++)
+        /// <summary>
+        /// Tests for spreadsheetReadException
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(SpreadsheetReadException))]
+        public void TestXml6()
+        {
+            AbstractSpreadsheet sheet;
+            using (TextReader test = File.OpenText("../../text5.xml"))
             {
-                Assert.IsTrue(sss.Contains("A1" + i));
+                sheet = new Spreadsheet(test);
             }
+        }
 
-            s.SetContentsOfCell("A10", 5.ToString());
+        /// <summary>
+        /// Tests for spreadsheetReadException
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(SpreadsheetReadException))]
+        public void TestXml7()
+        {
+            AbstractSpreadsheet sheet;
+            using (TextReader test = File.OpenText("../../text6.xml"))
+            {
+                sheet = new Spreadsheet(test);
+            }
         }
     }
 }
