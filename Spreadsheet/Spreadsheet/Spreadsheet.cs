@@ -143,7 +143,6 @@ namespace SS
 
             try
             {
-
                 using (XmlReader reader = XmlReader.Create(source, settings))
                 {
                     while (reader.Read())
@@ -157,21 +156,29 @@ namespace SS
                                 }
                                 break;
                             case "cell":
-                                try
+                                if (reader.NodeType != XmlNodeType.EndElement)
                                 {
-                                    SetContentsOfCell(reader["name"], reader["contents"]);
-                                }
-                                catch(CircularException)
-                                {
-                                    throw new SpreadsheetReadException("Circular exception");
-                                }
-                                catch (InvalidNameException)
-                                {
-                                    throw new SpreadsheetReadException("Invalid name error");
-                                }
-                                catch (FormulaFormatException)
-                                {
-                                    throw new SpreadsheetReadException("Formula format error");
+                                    try
+                                    {
+                                        if (theSpreadSheet.ContainsKey(reader["name"]))
+                                        {
+                                            throw new SpreadsheetReadException("Already contains this value");
+                                        }
+                                        SetContentsOfCell(reader["name"], reader["contents"]);
+                                    }
+
+                                    catch (CircularException)
+                                    {
+                                        throw new SpreadsheetReadException("Circular exception");
+                                    }
+                                    catch (InvalidNameException)
+                                    {
+                                        throw new SpreadsheetReadException("Invalid name error");
+                                    }
+                                    catch (FormulaFormatException)
+                                    {
+                                        throw new SpreadsheetReadException("Formula format error");
+                                    }
                                 }
                                 break;
                         }
@@ -189,15 +196,6 @@ namespace SS
                     throw new IOException();
                 }
             }
-
-            foreach (string element in GetNamesOfAllNonemptyCells())
-            {
-                if (theSpreadSheet[element].value is FormulaError)
-                {
-                    throw new SpreadsheetReadException("Formula error");
-                }
-            }
-
 
         }
 
