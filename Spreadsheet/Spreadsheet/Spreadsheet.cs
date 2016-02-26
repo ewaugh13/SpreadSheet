@@ -123,6 +123,11 @@ namespace SS
         /// </summary>
         public Spreadsheet(TextReader source)
         {
+            if (source == null)
+            {
+                throw new ArgumentNullException();
+            }
+
             theSpreadSheet = new Dictionary<string, Cell>();
             DepGraph = new DependencyGraph();
             Changed = false;
@@ -136,30 +141,56 @@ namespace SS
             settings.Schemas = schemaSet;
             settings.ValidationEventHandler += ValidationCallback;
 
-            using (XmlReader reader = XmlReader.Create(source, settings))
+            try
             {
-                while (reader.Read())
+
+                using (XmlReader reader = XmlReader.Create(source, settings))
                 {
-                    switch (reader.Name)
+                    while (reader.Read())
                     {
-                        case "spreadsheet":
-                            if (reader.NodeType != XmlNodeType.EndElement)
-                            {
-                                IsValid = new Regex(reader["IsValid"]);
-                            }
-                            break;
-                        case "cell":
-                            SetContentsOfCell(reader["name"], reader["contents"]);
-                            break;
+                        switch (reader.Name)
+                        {
+                            case "spreadsheet":
+                                if (reader.NodeType != XmlNodeType.EndElement)
+                                {
+                                    IsValid = new Regex(reader["IsValid"]);
+                                }
+                                break;
+                            case "cell":
+                                SetContentsOfCell(reader["name"], reader["contents"]);
+                                break;
+                        }
                     }
+                }
+            }
+            catch (Exception e)
+            {
+                if (!(e is IOException))
+                {
+                    throw new SpreadsheetReadException("Could not be read");
+                }
+                else
+                {
+                    throw new IOException();
                 }
             }
 
             foreach (string element in GetNamesOfAllNonemptyCells())
             {
-                if (theSpreadSheet[element].value is FormulaError)
+                if (theSpreadSheet[element].contents is Formula)
                 {
-                    throw new SpreadsheetReadException("Formula error");
+                    try
+                    {
+                        theSpreadSheet[element].value = new Formula(theSpreadSheet[element].contents.ToString()).Evaluate(lookUp);
+                    }
+                    catch (FormulaEvaluationException)
+                    {
+                        theSpreadSheet[element].value = new FormulaError();
+                    }
+                    if (theSpreadSheet[element].value is FormulaError)
+                    {
+                        throw new SpreadsheetReadException("Formula error");
+                    }
                 }
             }
 
@@ -428,48 +459,60 @@ namespace SS
         /// </summary>
         public override void Save(TextWriter dest)
         {
-            using (XmlWriter writer = XmlWriter.Create(dest))
+            try
             {
-                writer.WriteStartDocument();
-                writer.WriteStartElement("spreadsheet");
-                writer.WriteAttributeString("IsValid", IsValid.ToString());
-
-                List<string> cellsWithValues = new List<string>();
-
-                foreach (string cellElement in GetNamesOfAllNonemptyCells())
+                using (XmlWriter writer = XmlWriter.Create(dest))
                 {
-                    cellsWithValues.Add(cellElement);
+                    writer.WriteStartDocument();
+                    writer.WriteStartElement("spreadsheet");
+                    writer.WriteAttributeString("IsValid", IsValid.ToString());
+
+                    List<string> cellsWithValues = new List<string>();
+
+                    foreach (string cellElement in GetNamesOfAllNonemptyCells())
+                    {
+                        cellsWithValues.Add(cellElement);
+                    }
+
+                    foreach (string cellElement in cellsWithValues)
+                    {
+                        writer.WriteStartElement("cell");
+                        writer.WriteAttributeString("name", cellElement);
+                        if (theSpreadSheet[cellElement].contents is string)
+                        {
+                            writer.WriteAttributeString("contents", (string)theSpreadSheet[cellElement].contents);
+                        }
+
+                        else if (theSpreadSheet[cellElement].contents is double)
+                        {
+                            writer.WriteAttributeString("contents", theSpreadSheet[cellElement].contents.ToString());
+                        }
+
+                        else if (theSpreadSheet[cellElement].contents is Formula)
+                        {
+                            writer.WriteAttributeString("contents", "=" + theSpreadSheet[cellElement].contents.ToString());
+                        }
+
+                        writer.WriteEndElement();
+                    }
+
+                    writer.WriteEndElement();
+                    writer.WriteEndDocument();
                 }
-
-                foreach(string cellElement in cellsWithValues)
-                {
-                    writer.WriteStartElement("cell");
-                    writer.WriteAttributeString("name", cellElement);
-                    if(theSpreadSheet[cellElement].contents is string)
-                    {
-                        writer.WriteAttributeString("contents", (string)theSpreadSheet[cellElement].contents);
-                    }
-
-                    else if (theSpreadSheet[cellElement].contents is double)
-                    {
-                        writer.WriteAttributeString("contents", theSpreadSheet[cellElement].contents.ToString());
-                    }
-
-                    else if (theSpreadSheet[cellElement].contents is Formula)
-                    {
-                        writer.WriteAttributeString("contents", "=" + theSpreadSheet[cellElement].contents.ToString());
-                    }
-
-                    else if (theSpreadSheet[cellElement].contents is FormulaError)
-                    {
-                        writer.WriteAttributeString("contents", "=" + theSpreadSheet[cellElement].contents.ToString());
-                    }
-                }
-
-                writer.WriteEndElement();
-                writer.WriteEndDocument();
+                Changed = false;
             }
-            Changed = false;
+
+            catch (Exception e)
+            {
+                if (!(e is IOException))
+                {
+                    throw new SpreadsheetReadException("Sheet could not be read");
+                }
+                else
+                {
+                    throw new IOException();
+                }
+            }
         }
 
         // ADDED FOR PS6
@@ -508,7 +551,7 @@ namespace SS
             }
 
             theSpreadSheet[name].value = theSpreadSheet[name].contents;
-            return theSpreadSheet[name].value;
+            return theSpreadSheet[name].contents;
         }
 
         // ADDED FOR PS6
@@ -557,6 +600,8 @@ namespace SS
                 throw new ArgumentNullException();
             }
 
+            name = name.ToUpper();
+
             double value = 0;
             if (double.TryParse(content, out value))
             {
@@ -575,6 +620,17 @@ namespace SS
             }
 
             Changed = true;
+
+            GetCellValue(name);
+
+
+            foreach (string cell in GetCellsToRecalculate(name))
+            {
+                if (name != cell)
+                {
+                    GetCellValue(cell);
+                }
+            }
 
             return cellAndDependents;
 
@@ -608,6 +664,11 @@ namespace SS
             {
                 double value;
                 if (Double.TryParse(theSpreadSheet[input].contents.ToString(), out value))
+                {
+                    return value;
+                }
+
+                if (Double.TryParse(theSpreadSheet[input].value.ToString(), out value))
                 {
                     return value;
                 }

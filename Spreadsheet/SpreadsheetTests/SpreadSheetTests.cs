@@ -19,7 +19,6 @@ namespace SpreadsheetTests
         [TestMethod]
         public void TestSetCell1()
         {
-            Formula form = new Formula();
             Spreadsheet sheet = new Spreadsheet();
             sheet.SetContentsOfCell("A2", 3.ToString());
         }
@@ -454,7 +453,7 @@ namespace SpreadsheetTests
         /// Test get cell value with invalid name
         /// </summary>
         [TestMethod]
-        public void TestGettingValu7()
+        public void TestGettingValue7()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
             sheet.SetContentsOfCell("B5", "");
@@ -492,8 +491,41 @@ namespace SpreadsheetTests
             }
         }
 
+        [TestMethod()]
+        public void TestCellValue()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("A4", "=" + new Formula("5").ToString());
+            sheet.SetContentsOfCell("A3", "=" + new Formula("A4*2").ToString());
+            sheet.SetContentsOfCell("A2", "=" + new Formula("A3*2").ToString());
+            Assert.AreEqual(20.0, sheet.GetCellValue("A2"));
+            sheet.SetContentsOfCell("A4", "=" + new Formula("6").ToString());
+            Assert.AreEqual(24.0, sheet.GetCellValue("A2"));
+        }
 
+        [TestMethod()]
+        public void TestCellValue2()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("A3", "=" + new Formula("A4*2").ToString());
+            sheet.SetContentsOfCell("A2", "=" + new Formula("A3*2").ToString());
+            Assert.AreEqual(new FormulaError().GetType(), sheet.GetCellValue("A2").GetType());
+        }
 
+        [TestMethod()]
+        public void TestSetWithExtraRegex()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet(new Regex(@"^[A-M]+[1-9]\d*$"));
+            sheet.SetContentsOfCell("M2", 5.ToString());
+        }
+
+        [TestMethod()]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void TestSetWithExtraRegex2()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet(new Regex(@"^[A-M]+[1-9]\d*$"));
+            sheet.SetContentsOfCell("N2", 5.ToString());
+        }
 
         [TestMethod()]
         public void TestXmlSave()
@@ -501,8 +533,23 @@ namespace SpreadsheetTests
             AbstractSpreadsheet s = new Spreadsheet();
 
             s.SetContentsOfCell("A2", 5.ToString());
+            s.SetContentsOfCell("A3", "Hello");
+            s.SetContentsOfCell("A4", "=A2 * 2");
 
             using (TextWriter test = File.CreateText("C:\\Users\\Owner\\Desktop\\text.xml"))
+            {
+                s.Save(test);
+            }
+        }
+
+        [TestMethod()]
+        public void TestXmlSave2()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A3", "Hello");
+            s.SetContentsOfCell("A4", "=A2 * 2");
+
+            using (TextWriter test = File.CreateText("C:\\Users\\Owner\\Desktop\\text2.xml"))
             {
                 s.Save(test);
             }
@@ -524,6 +571,56 @@ namespace SpreadsheetTests
                 names.Add(cell);
             }
 
+            Assert.AreEqual(true, sheet.Changed);
+
+        }
+
+        [TestMethod()]
+        [ExpectedException(typeof(SpreadsheetReadException))]
+        public void TestXml2()
+        {
+            AbstractSpreadsheet sheet;
+            using (TextReader test = File.OpenText("C:\\Users\\Owner\\Desktop\\text2.xml"))
+            {
+                sheet = new Spreadsheet(test);
+            }
+        }
+
+        [TestMethod()]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void TestXml3()
+        {
+            AbstractSpreadsheet sheet;
+            using (TextReader test = null)
+            {
+                sheet = new Spreadsheet(test);
+            }
+        }
+
+        [TestMethod()]
+        public void TestLarge()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+            for (int i = 0; i < 500; i++)
+            {
+                s.SetContentsOfCell("A1" + i, "=" + new Formula("A1" + (i + 1)).ToString());
+            }
+
+            ISet<string> sss = s.SetContentsOfCell("A1499", 25.0.ToString());
+            Assert.AreEqual(500, sss.Count);
+            for (int i = 0; i < 500; i++)
+            {
+                Assert.IsTrue(sss.Contains("A1" + i));
+            }
+
+            sss = s.SetContentsOfCell("A1249", 25.0.ToString());
+            Assert.AreEqual(250, sss.Count);
+            for (int i = 0; i < 250; i++)
+            {
+                Assert.IsTrue(sss.Contains("A1" + i));
+            }
+
+            s.SetContentsOfCell("A10", 5.ToString());
         }
     }
 }
