@@ -531,29 +531,39 @@ namespace SS
                 throw new InvalidNameException();
             }
 
-            double value;
-            if (Double.TryParse(theSpreadSheet[name].contents.ToString(), out value))
-            {
-                theSpreadSheet[name].value = value;
-                return value;
-            }
+            name = name.ToUpper();
 
-            if (theSpreadSheet[name].contents.GetType().Name.Equals("Formula"))
+            if (theSpreadSheet.ContainsKey(name))
             {
-                try
+                double value;
+                if (Double.TryParse(theSpreadSheet[name].contents.ToString(), out value))
                 {
-                    theSpreadSheet[name].value = new Formula(theSpreadSheet[name].contents.ToString()).Evaluate(lookUp);
+                    theSpreadSheet[name].value = value;
+                    return value;
                 }
 
-                catch (FormulaEvaluationException)
+                if (theSpreadSheet[name].contents.GetType().Name.Equals("Formula"))
                 {
-                    theSpreadSheet[name].value = new FormulaError("The formula contents and not defined in the spreadsheet");
+                    try
+                    {
+                        theSpreadSheet[name].value = new Formula(theSpreadSheet[name].contents.ToString()).Evaluate(lookUp);
+                    }
+
+                    catch (FormulaEvaluationException)
+                    {
+                        theSpreadSheet[name].value = new FormulaError("The formula contents and not defined in the spreadsheet");
+                    }
+                    return theSpreadSheet[name].value;
                 }
-                return theSpreadSheet[name].value;
+
+                theSpreadSheet[name].value = theSpreadSheet[name].contents;
+                return theSpreadSheet[name].contents;
             }
 
-            theSpreadSheet[name].value = theSpreadSheet[name].contents;
-            return theSpreadSheet[name].contents;
+            else
+            {
+                return "";
+            }
         }
 
         // ADDED FOR PS6
