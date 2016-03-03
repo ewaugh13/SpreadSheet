@@ -71,7 +71,7 @@ namespace Formulas
                 Tokens.Add(token);
             }
 
-            if (Tokens.Count < 1)
+            if (Tokens.Count < 1 && f != "")
             {
                 throw new FormulaFormatException("Formula can't be constructed with no tokens");
             }
@@ -271,7 +271,7 @@ namespace Formulas
             Tuple<string, string> currentTuple;
             Tuple<string, string> topTuple;
 
-            if(Tokens == null)
+            if(Tokens == null || Tokens.Count == 0)
             {
                 return 0;
             }
