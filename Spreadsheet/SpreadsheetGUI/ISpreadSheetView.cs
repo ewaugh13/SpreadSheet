@@ -16,13 +16,15 @@ namespace SpreadsheetGUI
 
         event Action NewEvent;
 
-        event Action<SpreadsheetPanel, string> ChangeContents;
+        event Action<int, int, string> ChangeContents;
 
-        event Action<SpreadsheetPanel> ChangeSelection;
+        event Action<int, int> ChangeSelection;
 
-        event Action<SpreadsheetPanel> loadSpreadSheet;
+        event Action loadSpreadSheet;
 
         event Action<string> saveAsEvent;
+
+        event Action saveEvent;
 
         string Title { set; }
 
@@ -37,5 +39,7 @@ namespace SpreadsheetGUI
         void DoClose();
 
         void OpenNew();
+
+        void setPanelValue(int col, int row, string value);
     }
 }

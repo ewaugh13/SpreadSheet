@@ -33,25 +33,6 @@ namespace SpreadsheetGUI
             return context;
         }
 
-        /// <summary>
-        /// Runs a form in this application context
-        /// </summary>
-        public void RunNew()
-        {
-            // Create the window and the controller
-            GraphicSpreadSheet window = new GraphicSpreadSheet();
-            new Controller(window);
-
-            // One more form is running
-            windowCount++;
-
-            // When this form closes, we want to find out
-            window.FormClosed += (o, e) => { if (--windowCount <= 0) ExitThread(); };
-
-            // Run the form
-            window.Show();
-        }
-
         public void RunNew(string fileName)
         {
             // Create the window and the controller

@@ -43,10 +43,11 @@ namespace SpreadsheetGUI
         public event Action<string> FileChosenEvent;
         public event Action CloseEvent;
         public event Action NewEvent;
-        public event Action<SpreadsheetPanel, string> ChangeContents;
-        public event Action<SpreadsheetPanel> ChangeSelection;
-        public event Action<SpreadsheetPanel> loadSpreadSheet;
+        public event Action<int, int, string> ChangeContents;
+        public event Action<int, int> ChangeSelection;
+        public event Action loadSpreadSheet;
         public event Action<string> saveAsEvent;
+        public event Action saveEvent;
 
         /// <summary>
         /// Handles the Click event of the closeItem control.
@@ -66,7 +67,7 @@ namespace SpreadsheetGUI
 
         public void OpenNew()
         {
-            SpreadSheetContext.GetContext().RunNew();
+            SpreadSheetContext.GetContext().RunNew("");
         }
 
         private void Contents_KeyPress(object sender, KeyPressEventArgs e)
@@ -75,31 +76,37 @@ namespace SpreadsheetGUI
             {
                 if (e.KeyChar == (char)Keys.Enter)
                 {
-                    ChangeContents(spreadsheetPanel1, Contents.Text);
+                    int col;
+                    int row;
+
+                    spreadsheetPanel1.GetSelection(out col, out row);
+                    ChangeContents(col, row, Contents.Text);
                 }
             }
         }
-
 
         private void SpreadsheetGUI_load(object sender, EventArgs e)
         {
             if (ChangeSelection != null)
             {
-                ChangeSelection(spreadsheetPanel1);
+                ChangeSelection(0, 0);
             }
 
             if (loadSpreadSheet != null)
             {
-                loadSpreadSheet(spreadsheetPanel1);
+                loadSpreadSheet();
             }
         }
-
 
         private void selection(SpreadsheetPanel panel)
         {
             if (ChangeSelection != null)
             {
-                ChangeSelection(spreadsheetPanel1);
+                int col;
+                int row;
+
+                spreadsheetPanel1.GetSelection(out col, out row);
+                ChangeSelection(col, row);
             }
         }
 
@@ -133,7 +140,6 @@ namespace SpreadsheetGUI
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            saveFileDialog1.Filter = "Spreadsheet File (.ss)|*.ss";
             DialogResult result = saveFileDialog1.ShowDialog();
 
             if (result == DialogResult.Yes || result == DialogResult.OK)
@@ -145,9 +151,22 @@ namespace SpreadsheetGUI
             }
         }
 
+        private void saveToolStripMenuItem_Save(object sender, EventArgs e)
+        {
+            if(saveEvent != null)
+            {
+                saveEvent();
+            }
+        }
+
         private void helpToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MessageBox.Show("This the shit for help");
+        }
+
+        public void setPanelValue(int col, int row, string value)
+        {
+            spreadsheetPanel1.SetValue(col, row, value);
         }
     }
 }

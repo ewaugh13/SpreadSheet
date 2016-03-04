@@ -16,28 +16,23 @@ namespace SpreadsheetGUI
         // The model being used
         private Spreadsheet sheet;
 
+        private string file;
+
         /// <summary>
         /// Begins controlling window.
         /// </summary>
-        public Controller(ISpreadSheetView window)
-        {
-            this.window = window;
-            this.sheet = new Spreadsheet();
-            window.CloseEvent += HandleClose;
-            window.NewEvent += HandleNew;
-            window.ChangeContents += ContentsChanged;
-            window.ChangeSelection += SelectionChanged;
-            window.FileChosenEvent += FileSelected;
-            window.saveAsEvent += SaveAs;
-        }
-
         public Controller(ISpreadSheetView window, string fileName)
         {
             this.window = window;
-            TextReader file = File.OpenText(fileName);
-            sheet = new Spreadsheet(file);
-
-            window.Title = "hello";
+            if (fileName != "")
+            {
+                TextReader file = File.OpenText(fileName);
+                sheet = new Spreadsheet(file);
+            }
+            else
+            {
+                sheet = new Spreadsheet();
+            }
 
             window.CloseEvent += HandleClose;
             window.NewEvent += HandleNew;
@@ -46,6 +41,7 @@ namespace SpreadsheetGUI
             window.FileChosenEvent += FileSelected;
             window.loadSpreadSheet += SpreadSheetLoad;
             window.saveAsEvent += SaveAs;
+            window.saveEvent += Save;
         }
 
         /// <summary>
@@ -53,11 +49,18 @@ namespace SpreadsheetGUI
         /// </summary>
         private void HandleClose()
         {
-            if(sheet.Changed == true)
+            if (sheet.Changed == true)
             {
-                MessageBox.Show("The Contents have not been saved. Do you want to save?", "File not saved");
+                DialogResult result = MessageBox.Show("The Contents have not been saved. Do you want to close the spreadsheet?", "File not saved", MessageBoxButtons.YesNo);
+                if (result == DialogResult.Yes)
+                {
+                    window.DoClose();
+                }
             }
-            window.DoClose();
+            else
+            {
+                window.DoClose();
+            }
         }
 
         /// <summary>
@@ -68,19 +71,16 @@ namespace SpreadsheetGUI
             window.OpenNew();
         }
 
-        private void ContentsChanged(SpreadsheetPanel sender, string value)
+        private void ContentsChanged(int col, int row, string value)
         {
-            int col;
-            int row;
-            sender.GetSelection(out col, out row);
-
             string name = getNameOfCell(col, row);
 
             try
             {
                 foreach (string cell in sheet.SetContentsOfCell(name, value))
                 {
-                    sender.SetValue((int)(cell[0]) - 65, int.Parse((cell.Substring(1))) - 1, sheet.GetCellValue(cell).ToString());
+                    
+                    window.setPanelValue((int)(cell[0]) - 65, int.Parse((cell.Substring(1))) - 1, sheet.GetCellValue(cell).ToString());
                 }
 
                 window.ValueOfCell = sheet.GetCellValue(name).ToString();
@@ -89,40 +89,61 @@ namespace SpreadsheetGUI
             catch (CircularException)
             {
                 window.Message = "Can't set a cell to this value because it forms a circular expression.";
+                string oldContents = sheet.GetCellContents(name).ToString();
+
+                if(oldContents == "System.Object")
+                {
+                    oldContents = "";
+                }
+
                 window.ContentsOfCell = sheet.GetCellContents(name).ToString();
             }
             catch (FormulaFormatException)
-            {               
+            {
                 window.Message = "Can't set a cell to this value because it's not a proper formula.";
-                window.ContentsOfCell = sheet.GetCellContents(name).ToString();
+                string oldContents = sheet.GetCellContents(name).ToString();
+
+                if (oldContents == "System.Object")
+                {
+                    oldContents = "";
+                }
+
+                window.ContentsOfCell = oldContents;
             }
         }
 
-        private void SelectionChanged(SpreadsheetPanel sender)
+        private void SelectionChanged(int col, int row)
         {
-            int col;
-            int row;
-            sender.GetSelection(out col, out row);
-
             string name = getNameOfCell(col, row);
             window.NameOfCell = name;
             window.ContentsOfCell = sheet.GetCellContents(name).ToString();
-            window.ValueOfCell = sheet.GetCellValue(name).ToString();          
+            window.ValueOfCell = sheet.GetCellValue(name).ToString();
         }
 
-        private void SpreadSheetLoad(SpreadsheetPanel sender)
+        private void SpreadSheetLoad()
         {
-            setSpreadsheetCells(sender);
+            setSpreadsheetCells();
         }
 
         private void FileSelected(string fileName)
         {
+            file = fileName;
             SpreadSheetContext.GetContext().RunNew(fileName);
         }
 
-        private void SaveAs(string filname)
+        private void SaveAs(string filename)
         {
-            using (TextWriter file = File.CreateText(filname))
+            file = filename;
+            using (TextWriter file = File.CreateText(filename))
+            {
+                sheet.Save(file);
+            }
+        }
+
+        private void Save()
+        {
+            string fileName = file;
+            using (TextWriter file = File.CreateText(fileName))
             {
                 sheet.Save(file);
             }
@@ -133,11 +154,11 @@ namespace SpreadsheetGUI
             return char.ConvertFromUtf32(col + 65) + (row + 1);
         }
 
-        private void setSpreadsheetCells(SpreadsheetPanel sender)
+        private void setSpreadsheetCells()
         {
             foreach (string cellName in sheet.GetNamesOfAllNonemptyCells())
             {
-                sender.SetValue((int)(cellName[0]) - 65, int.Parse((cellName.Substring(1))) - 1, sheet.GetCellValue(cellName).ToString());
+                window.setPanelValue((int)(cellName[0]) - 65, int.Parse((cellName.Substring(1))) - 1, sheet.GetCellValue(cellName).ToString());
             }
         }
     }

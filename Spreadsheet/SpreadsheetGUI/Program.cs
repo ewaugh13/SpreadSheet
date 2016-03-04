@@ -23,7 +23,7 @@ namespace SpreadsheetGUI
 
             // Get the application context and run one form inside it
             var context = SpreadSheetContext.GetContext();
-            SpreadSheetContext.GetContext().RunNew();
+            SpreadSheetContext.GetContext().RunNew("");
             Application.Run(context);
         }
     }
