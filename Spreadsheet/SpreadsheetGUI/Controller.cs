@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using SS;
 using System.Windows.Forms;
-using SSGui;
 using System.IO;
 using Formulas;
 
 namespace SpreadsheetGUI
 {
-    class Controller
+    public class Controller
     {
         // The window being controlled
         private ISpreadSheetView window;
@@ -127,8 +126,15 @@ namespace SpreadsheetGUI
 
         private void FileSelected(string fileName)
         {
-            file = fileName;
-            SpreadSheetContext.GetContext().RunNew(fileName);
+            try
+            {
+                file = fileName;
+                SpreadSheetContext.GetContext().RunNew(fileName);
+            }
+            catch(Exception ex)
+            {
+                window.Message = "Unable to open file\n" + ex.Message;
+            }
         }
 
         private void SaveAs(string filename)

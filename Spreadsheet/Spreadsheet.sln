@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpreadSheetTests", "SpreadS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpreadsheetGUI", "SpreadsheetGUI\SpreadsheetGUI.csproj", "{B76995C3-F9A2-4482-907A-69AC813CE38A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControllerTester", "ControllerTester\ControllerTester.csproj", "{2612830E-0CC2-4C67-8255-DDB9AC1B672C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -195,6 +197,18 @@ Global
 		{B76995C3-F9A2-4482-907A-69AC813CE38A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{B76995C3-F9A2-4482-907A-69AC813CE38A}.Release|x86.ActiveCfg = Release|Any CPU
 		{B76995C3-F9A2-4482-907A-69AC813CE38A}.Release|x86.Build.0 = Release|Any CPU
+		{2612830E-0CC2-4C67-8255-DDB9AC1B672C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2612830E-0CC2-4C67-8255-DDB9AC1B672C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2612830E-0CC2-4C67-8255-DDB9AC1B672C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{2612830E-0CC2-4C67-8255-DDB9AC1B672C}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{2612830E-0CC2-4C67-8255-DDB9AC1B672C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2612830E-0CC2-4C67-8255-DDB9AC1B672C}.Debug|x86.Build.0 = Debug|Any CPU
+		{2612830E-0CC2-4C67-8255-DDB9AC1B672C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2612830E-0CC2-4C67-8255-DDB9AC1B672C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2612830E-0CC2-4C67-8255-DDB9AC1B672C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{2612830E-0CC2-4C67-8255-DDB9AC1B672C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{2612830E-0CC2-4C67-8255-DDB9AC1B672C}.Release|x86.ActiveCfg = Release|Any CPU
+		{2612830E-0CC2-4C67-8255-DDB9AC1B672C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
