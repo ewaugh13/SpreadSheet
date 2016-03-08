@@ -32,7 +32,6 @@ namespace SpreadsheetGUI
             {
                 sheet = new Spreadsheet();
             }
-
             window.CloseEvent += HandleClose;
             window.NewEvent += HandleNew;
             window.ChangeContents += ContentsChanged;
@@ -41,6 +40,7 @@ namespace SpreadsheetGUI
             window.loadSpreadSheet += SpreadSheetLoad;
             window.saveAsEvent += SaveAs;
             window.saveEvent += Save;
+            window.helpEvent += ShowHelp;
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace SpreadsheetGUI
             {
                 foreach (string cell in sheet.SetContentsOfCell(name, value))
                 {
-                    
+
                     window.setPanelValue((int)(cell[0]) - 65, int.Parse((cell.Substring(1))) - 1, sheet.GetCellValue(cell).ToString());
                 }
 
@@ -90,7 +90,7 @@ namespace SpreadsheetGUI
                 window.Message = "Can't set a cell to this value because it forms a circular expression.";
                 string oldContents = sheet.GetCellContents(name).ToString();
 
-                if(oldContents == "System.Object")
+                if (oldContents == "System.Object")
                 {
                     oldContents = "";
                 }
@@ -131,7 +131,7 @@ namespace SpreadsheetGUI
                 file = fileName;
                 SpreadSheetContext.GetContext().RunNew(fileName);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 window.Message = "Unable to open file\n" + ex.Message;
             }
@@ -166,6 +166,11 @@ namespace SpreadsheetGUI
             {
                 window.setPanelValue((int)(cellName[0]) - 65, int.Parse((cellName.Substring(1))) - 1, sheet.GetCellValue(cellName).ToString());
             }
+        }
+
+        private void ShowHelp()
+        {
+            window.Message = "";
         }
     }
 }

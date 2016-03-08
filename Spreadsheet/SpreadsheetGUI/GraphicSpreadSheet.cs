@@ -48,6 +48,7 @@ namespace SpreadsheetGUI
         public event Action loadSpreadSheet;
         public event Action<string> saveAsEvent;
         public event Action saveEvent;
+        public event Action helpEvent;
 
         /// <summary>
         /// Handles the Click event of the closeItem control.
@@ -161,7 +162,10 @@ namespace SpreadsheetGUI
 
         private void helpToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("This the shit for help");
+            if(helpEvent != null)
+            {
+                helpEvent();
+            }
         }
 
         public void setPanelValue(int col, int row, string value)

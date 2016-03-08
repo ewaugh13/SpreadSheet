@@ -26,6 +26,8 @@ namespace SpreadsheetGUI
 
         event Action saveEvent;
 
+        event Action helpEvent;
+
         string Title { set; }
 
         string Message { set; }

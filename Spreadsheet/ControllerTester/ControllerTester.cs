@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SpreadsheetGUI;
+using SS;
 
 namespace ControllerTester
 {
@@ -31,6 +32,7 @@ namespace ControllerTester
             stub.FireChangeSelection(0, 0);
             Assert.AreEqual("Hello", stub.ValueOfCell);
             Assert.AreEqual("A1", stub.NameOfCell);
+            Assert.AreEqual("Hello", stub.ContentsOfCell);
         }
 
         [TestMethod]
@@ -67,6 +69,7 @@ namespace ControllerTester
             SpreadsheetStub stub = new SpreadsheetStub();
             Controller controller = new Controller(stub, "");
             stub.FireChangeContents(0, 0, "5");
+            stub.FireChangeContents(0, 1, "7");
             stub.FireSaveAs("../../sheet.ss");
         }
 
@@ -74,10 +77,34 @@ namespace ControllerTester
         public void OpenFile()
         {
             SpreadsheetStub stub = new SpreadsheetStub();
-            Controller controller2 = new Controller(stub, "");
+            Controller controller = new Controller(stub, "../../sheet.ss");
             stub.FireLoadEvent();
-            stub.FireFileChosen("../../sheet2.ss");
+            stub.FireChangeSelection(0, 1);
+            Assert.AreEqual("7", stub.ValueOfCell);
+            stub.FireChangeSelection(0, 0);
             Assert.AreEqual("5", stub.ValueOfCell);
+            stub.FireCloseEvent();
+        }
+
+        [TestMethod]
+        public void OpenFile2()
+        {
+            SpreadsheetStub stub = new SpreadsheetStub();
+            Controller controller = new Controller(stub, "");
+            stub.FireFileChosen("../../sheet.ss");
+            stub.FireCloseEvent();
+        }
+
+        [TestMethod]
+        public void SaveFile()
+        {
+            SpreadsheetStub stub = new SpreadsheetStub();
+            Controller controller = new Controller(stub, "");
+            stub.FireChangeContents(0, 0, "5");
+            stub.FireChangeContents(0, 1, "7");
+            stub.FireSaveAs("../../sheet2.ss");
+            stub.FireChangeContents(0, 0, "10");
+            stub.FireSave();
         }
     }
 }

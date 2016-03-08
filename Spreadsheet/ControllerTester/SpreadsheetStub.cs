@@ -80,6 +80,14 @@ namespace ControllerTester
             }
         }
 
+        public void FireSave()
+        {
+            if (saveEvent != null)
+            {
+                saveEvent();
+            }
+        }
+
         public void FireFileChosen(string FileName)
         {
             if(FileChosenEvent != null)
@@ -121,6 +129,7 @@ namespace ControllerTester
         public event Action NewEvent;
         public event Action<string> saveAsEvent;
         public event Action saveEvent;
+        public event Action helpEvent;
 
         public void DoClose()
         {
