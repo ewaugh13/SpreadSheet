@@ -4,6 +4,7 @@ using SS;
 using System.Windows.Forms;
 using System.IO;
 using Formulas;
+using System.Text.RegularExpressions;
 
 namespace SpreadsheetGUI
 {
@@ -15,10 +16,11 @@ namespace SpreadsheetGUI
         // The model being used
         private Spreadsheet sheet;
 
-        private string file;
+        // The string to access the filename
+        private string file = "";
 
         /// <summary>
-        /// Begins controlling window.
+        /// Begins controlling window. Will create the spreadsheet and add the methods from the controller to the events
         /// </summary>
         public Controller(ISpreadSheetView window, string fileName)
         {
@@ -70,10 +72,12 @@ namespace SpreadsheetGUI
             window.OpenNew();
         }
 
+        /// <summary>
+        /// Handles the contents of a cell being changed in the GUI and the spreadsheet
+        /// </summary>
         private void ContentsChanged(int col, int row, string value)
         {
             string name = getNameOfCell(col, row);
-
             try
             {
                 foreach (string cell in sheet.SetContentsOfCell(name, value))
@@ -99,7 +103,7 @@ namespace SpreadsheetGUI
             }
             catch (FormulaFormatException)
             {
-                window.Message = "Can't set a cell to this value because it's not a proper formula.";
+                window.Message = "Can't set a cell to this value because it's not a proper formula or is not in range.";
                 string oldContents = sheet.GetCellContents(name).ToString();
 
                 if (oldContents == "System.Object")
@@ -111,6 +115,9 @@ namespace SpreadsheetGUI
             }
         }
 
+        /// <summary>
+        /// Handles selecting another cell
+        /// </summary>
         private void SelectionChanged(int col, int row)
         {
             string name = getNameOfCell(col, row);
@@ -119,11 +126,17 @@ namespace SpreadsheetGUI
             window.ValueOfCell = sheet.GetCellValue(name).ToString();
         }
 
+        /// <summary>
+        /// Loads the spreadsheet
+        /// </summary>
         private void SpreadSheetLoad()
         {
             setSpreadsheetCells();
         }
 
+        /// <summary>
+        /// Handles the selection of the file
+        /// </summary>
         private void FileSelected(string fileName)
         {
             try
@@ -137,6 +150,9 @@ namespace SpreadsheetGUI
             }
         }
 
+        /// <summary>
+        /// Handles saving a spreadsheet to a location as a .ss file
+        /// </summary>
         private void SaveAs(string filename)
         {
             file = filename;
@@ -146,20 +162,36 @@ namespace SpreadsheetGUI
             }
         }
 
+        /// <summary>
+        /// Handles saving to the current filename
+        /// </summary>
         private void Save()
         {
             string fileName = file;
-            using (TextWriter file = File.CreateText(fileName))
+            if (fileName != "")
             {
-                sheet.Save(file);
+                using (TextWriter file = File.CreateText(fileName))
+                {
+                    sheet.Save(file);
+                }
+            }
+            else
+            {
+                window.Message = "Can't save because there is no file location. Call save as a file location.";
             }
         }
 
+        /// <summary>
+        /// Gets the name of the cell based on the col and row
+        /// </summary>
         private string getNameOfCell(int col, int row)
         {
             return char.ConvertFromUtf32(col + 65) + (row + 1);
         }
 
+        /// <summary>
+        /// Will set the contents of the GUI.
+        /// </summary>
         private void setSpreadsheetCells()
         {
             foreach (string cellName in sheet.GetNamesOfAllNonemptyCells())
@@ -168,9 +200,16 @@ namespace SpreadsheetGUI
             }
         }
 
+        /// <summary>
+        /// Handles showing the help box
+        /// </summary>
         private void ShowHelp()
         {
-            window.Message = "";
+            window.Message = "This is a spreadsheet that acts similar to excel. You have cells that you can click on and it will display thier name, contents, and value in" +
+            " the top bar. To change the contents of the curently clicked cell you put the value into the contents (either a number, formula, or a word/string) and then press enter to update it." + 
+            " Clicking on file will drop down letting you select from multiple options. Clicking on new will open up a new spreadsheet, clicking on open will allow you to open"+
+            " a saved a saed spreadsheet file. Clicking on save as will let you save the the file as a .ss file. Clicking on save will save the current file as long as it has a file location" +
+            " Clicking on close will close the program. Clicking on help will show this message box. Clicking on the red X will also close the program";
         }
     }
 }

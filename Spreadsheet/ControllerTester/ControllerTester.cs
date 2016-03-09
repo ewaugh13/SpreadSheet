@@ -8,6 +8,9 @@ namespace ControllerTester
     [TestClass]
     public class ControllerTester
     {
+        /// <summary>
+        /// Opens and closes a window
+        /// </summary>
         [TestMethod]
         public void TestOpenAndNew()
         {
@@ -19,6 +22,9 @@ namespace ControllerTester
             Assert.IsTrue(stub.CalledOpenNew);
         }
 
+        /// <summary>
+        /// Tests changing contents of the cells
+        /// </summary>
         [TestMethod]
         public void TestChangeContents()
         {
@@ -35,6 +41,9 @@ namespace ControllerTester
             Assert.AreEqual("Hello", stub.ContentsOfCell);
         }
 
+        /// <summary>
+        /// Tests circular exceptions and formula format error
+        /// </summary>
         [TestMethod]
         public void TestChangeContentsForCircularandFormulaFormatError()
         {
@@ -47,6 +56,9 @@ namespace ControllerTester
             Assert.AreEqual("5", stub.ValueOfCell);
         }
 
+        /// <summary>
+        /// Test circular exception and formula format error
+        /// </summary>
         [TestMethod]
         public void TestChangeContentsForCircularandFormulaFormatError2()
         {
@@ -63,6 +75,9 @@ namespace ControllerTester
             Assert.AreEqual("A2", stub.NameOfCell);
         }
 
+        /// <summary>
+        /// Saves a ss file
+        /// </summary>
         [TestMethod]
         public void TestSaveAs()
         {
@@ -73,6 +88,9 @@ namespace ControllerTester
             stub.FireSaveAs("../../sheet.ss");
         }
 
+        /// <summary>
+        /// Opens up a ss file
+        /// </summary>
         [TestMethod]
         public void OpenFile()
         {
@@ -86,6 +104,9 @@ namespace ControllerTester
             stub.FireCloseEvent();
         }
 
+        /// <summary>
+        /// Opens a saved ss file
+        /// </summary>
         [TestMethod]
         public void OpenFile2()
         {
@@ -95,6 +116,9 @@ namespace ControllerTester
             stub.FireCloseEvent();
         }
 
+        /// <summary>
+        /// Saves a current file
+        /// </summary>
         [TestMethod]
         public void SaveFile()
         {
@@ -105,6 +129,41 @@ namespace ControllerTester
             stub.FireSaveAs("../../sheet2.ss");
             stub.FireChangeContents(0, 0, "10");
             stub.FireSave();
+        }
+
+        /// <summary>
+        /// Calls the help menu
+        /// </summary>
+        [TestMethod]
+        public void CallHelp()
+        {
+            SpreadsheetStub stub = new SpreadsheetStub();
+            Controller controller = new Controller(stub, "");
+            stub.FireHelp();
+        }
+
+        /// <summary>
+        /// Check a file open error
+        /// </summary>
+        [TestMethod]
+        public void FileOpenError()
+        {
+            SpreadsheetStub stub = new SpreadsheetStub();
+            Controller controller = new Controller(stub, "");
+            stub.FireFileChosen("../sheet2.ss");
+            Assert.IsTrue(stub.Message.Contains("Unable to open"));
+        }
+
+        /// <summary>
+        /// Checks that you can't save a file that doesn't have a location
+        /// </summary>
+        [TestMethod]
+        public void FileSaveMessage()
+        {
+            SpreadsheetStub stub = new SpreadsheetStub();
+            Controller controller = new Controller(stub, "");
+            stub.FireSave();
+            Assert.IsTrue(stub.Message.Contains("Can't save because"));
         }
     }
 }

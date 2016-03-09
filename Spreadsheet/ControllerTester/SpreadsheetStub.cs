@@ -7,26 +7,37 @@ namespace ControllerTester
 {
     class SpreadsheetStub : ISpreadSheetView
     {
+        /// <summary>
+        /// Shows if do close was called
+        /// </summary>
         public bool CalledDoClose
         {
             get; private set;
         }
-
+        /// <summary>
+        /// Shows if open was called
+        /// </summary>
         public bool CalledOpenNew
         {
             get; private set;
         }
-
+        /// <summary>
+        /// Shows if load was called
+        /// </summary>
         public bool CalledLoad
         {
             get; private set;
         }
-
+        /// <summary>
+        /// Shows if contents were changed
+        /// </summary>
         public bool ContentsChanged
         {
             get; private set;
         }
-
+        /// <summary>
+        /// Calls close event
+        /// </summary>
         public void FireCloseEvent()
         {
             if (CloseEvent != null)
@@ -34,7 +45,9 @@ namespace ControllerTester
                 CloseEvent();
             }
         }
-
+        /// <summary>
+        /// Calls new event
+        /// </summary>
         public void FireNewEvent()
         {
             if (NewEvent != null)
@@ -42,7 +55,9 @@ namespace ControllerTester
                 NewEvent();
             }
         }
-
+        /// <summary>
+        /// Calls load event
+        /// </summary>
         public void FireLoadEvent()
         {
             if (ChangeSelection != null)
@@ -55,7 +70,9 @@ namespace ControllerTester
                 loadSpreadSheet();
             }
         }
-
+        /// <summary>
+        /// Calls change contents event
+        /// </summary>
         public void FireChangeContents(int col, int row, string contents)
         {
             if(ChangeContents != null)
@@ -63,7 +80,9 @@ namespace ControllerTester
                 ChangeContents(col, row, contents);
             }
         }
-
+        /// <summary>
+        /// Calls change selection event
+        /// </summary>
         public void FireChangeSelection(int col, int row)
         {
             if(ChangeSelection != null)
@@ -71,7 +90,9 @@ namespace ControllerTester
                 ChangeSelection(col, row);
             }
         }
-
+        /// <summary>
+        /// Calls save as event
+        /// </summary>
         public void FireSaveAs(string FileName)
         {
             if(saveAsEvent != null)
@@ -79,7 +100,9 @@ namespace ControllerTester
                 saveAsEvent(FileName);
             }
         }
-
+        /// <summary>
+        /// Calls save event
+        /// </summary>
         public void FireSave()
         {
             if (saveEvent != null)
@@ -87,7 +110,9 @@ namespace ControllerTester
                 saveEvent();
             }
         }
-
+        /// <summary>
+        /// Calls file chosen event
+        /// </summary>
         public void FireFileChosen(string FileName)
         {
             if(FileChosenEvent != null)
@@ -95,27 +120,47 @@ namespace ControllerTester
                 FileChosenEvent(FileName);
             }
         }
-
+        /// <summary>
+        /// Calls help event
+        /// </summary>
+        public void FireHelp()
+        {
+            if(helpEvent != null)
+            {
+                helpEvent();
+            }
+        }
+        /// <summary>
+        /// The contents of the cell
+        /// </summary>
         public string ContentsOfCell
         {
             set; get;
         }
-
+        /// <summary>
+        /// The current message
+        /// </summary>
         public string Message
         {
             set; get;
         }
-
+        /// <summary>
+        /// Name in name of cell box
+        /// </summary>
         public string NameOfCell
         {
             set; get;
         }
-
+        /// <summary>
+        /// Title of window
+        /// </summary>
         public string Title
         {
             set; get;
         }
-
+        /// <summary>
+        /// The value of the cell
+        /// </summary>
         public string ValueOfCell
         {
             set; get;
@@ -131,16 +176,23 @@ namespace ControllerTester
         public event Action saveEvent;
         public event Action helpEvent;
 
+        /// <summary>
+        /// Closes the window
+        /// </summary>
         public void DoClose()
         {
             CalledDoClose = true;
         }
-
+        /// <summary>
+        /// Opens a new window
+        /// </summary>
         public void OpenNew()
         {
             CalledOpenNew = true;
         }
-
+        /// <summary>
+        /// Sets the panel values
+        /// </summary>
         public void setPanelValue(int col, int row, string value)
         {
             ContentsChanged = true;
