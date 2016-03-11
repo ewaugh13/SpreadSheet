@@ -664,17 +664,20 @@ namespace SS
                 IsValidBool = false;
             }
 
-            if (char.IsLetter(name[1]))
+            if (IsValidBool == true)
             {
-                IsValidBool = false;
-            }
-
-            double value;
-            if (double.TryParse(name.Substring(1), out value))
-            {
-                if (value > 99 || value < 1)
+                if (char.IsLetter(name[1]))
                 {
                     IsValidBool = false;
+                }
+
+                double value;
+                if (double.TryParse(name.Substring(1), out value))
+                {
+                    if (value > 99 || value < 1)
+                    {
+                        IsValidBool = false;
+                    }
                 }
             }
 
